@@ -1,0 +1,66 @@
+[tools]
+node = "24.15.0"
+bun = "1.3.14"
+java = "temurin-25.0.3+9.0.LTS"
+"npm:@angular/cli" = "22.0.0"
+
+# === Main tasks ===
+
+[tasks.apply]
+description = "Apply all available automatic formatting and lint fixes. Run by developers."
+depends = ["apply:frontend", "apply:backend"]
+
+[tasks.check]
+description = "Check formatting and linting for frontend and backend. Run in CI/CD and commit hooks."
+depends = ["check:frontend", "check:backend"]
+
+[tasks.dev]
+description = "Start the full local dev environment: Docker services, backend, and frontend."
+depends = ["dev:docker"]
+run = "mise run dev:backend ::: dev:frontend"
+
+# === Secondary tasks ===
+
+[tasks."dev:docker"]
+description = "Start local Postgres service for development, waiting until they are healthy."
+run = "docker compose -f compose.dev.yaml up --detach --wait app-postgres"
+
+[tasks."dev:frontend"]
+description = "Start the Angular frontend dev server."
+dir = "eval-suite-frontend"
+run = "bun run start"
+
+[tasks."dev:backend"]
+description = "Start the Spring Boot backend dev server against the local Postgres database."
+dir = "eval-suite-backend"
+env = { SPRING_DATASOURCE_URL = "jdbc:postgresql://localhost:5433/eval_suite", SPRING_DATASOURCE_USERNAME = "eval_suite", SPRING_DATASOURCE_PASSWORD = "eval_suite", SPRING_JPA_HIBERNATE_DDL_AUTO = "validate", SPRING_JPA_OPEN_IN_VIEW = "false", MANAGEMENT_HEALTH_REDIS_ENABLED = "false" }
+run = "./mvnw spring-boot:run"
+
+[tasks."db:nuke"]
+description = "Recreate the local application database container and volume."
+run = """
+docker compose -f compose.dev.yaml stop app-postgres
+docker compose -f compose.dev.yaml rm -f app-postgres
+docker volume rm eval-suite-app-postgres-data || true
+docker compose -f compose.dev.yaml up -d app-postgres
+"""
+
+[tasks."apply:frontend"]
+description = "Apply frontend formatting and autofixable lint fixes"
+dir = "eval-suite-frontend"
+run = "bun run lint:fix && bun run format"
+
+[tasks."apply:backend"]
+description = "Apply backend formatting fixes with Spotless"
+dir = "eval-suite-backend"
+run = "./mvnw spotless:apply"
+
+[tasks."check:frontend"]
+description = "Check frontend formatting and lint Angular TypeScript and HTML templates"
+dir = "eval-suite-frontend"
+run = "bun run format:check && bun run lint"
+
+[tasks."check:backend"]
+description = "Check backend formatting and lint Spring Boot Java files"
+dir = "eval-suite-backend"
+run = "./mvnw -DskipTests spotless:check checkstyle:check pmd:check compile spotbugs:check"

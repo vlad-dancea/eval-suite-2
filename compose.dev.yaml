@@ -1,0 +1,21 @@
+services:
+    app-postgres:
+        image: postgres:17-alpine
+        container_name: eval-suite-app-postgres
+        environment:
+            POSTGRES_DB: eval_suite
+            POSTGRES_USER: eval_suite
+            POSTGRES_PASSWORD: eval_suite
+        ports:
+            - "5433:5432"
+        volumes:
+            - app-postgres-data:/var/lib/postgresql/data
+        healthcheck:
+            test: ["CMD-SHELL", "pg_isready -U eval_suite -d eval_suite"]
+            interval: 5s
+            timeout: 5s
+            retries: 12
+
+volumes:
+    app-postgres-data:
+        name: eval-suite-app-postgres-data

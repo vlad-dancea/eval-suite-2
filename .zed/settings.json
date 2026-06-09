@@ -1,0 +1,90 @@
+{
+    "file_scan_exclusions": [
+        // DEFAULTS
+        "**/.git",
+        "**/.svn",
+        "**/.hg",
+        "**/.jj",
+        "**/CVS",
+        "**/.DS_Store",
+        "**/Thumbs.db",
+        "**/.classpath",
+        "**/.settings",
+
+        // CUSTOM
+        "**/.angular",
+        "**/dist",
+        "**/node_modules",
+        "**/.mvn",
+        "**/mvnwm",
+        "**/mvnw",
+        "**/mvnw.cmd",
+    ],
+    "languages": {
+        "TypeScript": {
+            "formatter": {
+                "external": {
+                    "command": "mise",
+                    "arguments": [
+                        "x",
+                        "--",
+                        "bun",
+                        "--cwd",
+                        "magnum-opus-frontend",
+                        "exec",
+                        "prettier",
+                        "--stdin-filepath",
+                        "{buffer_path}",
+                    ],
+                },
+            },
+            "code_actions_on_format": {
+                "source.fixAll.eslint": true,
+            },
+            "format_on_save": "on",
+        },
+        "HTML": {
+            "formatter": {
+                "external": {
+                    "command": "mise",
+                    "arguments": [
+                        "x",
+                        "--",
+                        "bun",
+                        "--cwd",
+                        "magnum-opus-frontend",
+                        "exec",
+                        "prettier",
+                        "--stdin-filepath",
+                        "{buffer_path}",
+                    ],
+                },
+            },
+            "code_actions_on_format": {
+                "source.fixAll.eslint": true,
+            },
+            "format_on_save": "on",
+        },
+        "Java": {
+            "formatter": {
+                "external": {
+                    "command": "bash",
+                    "arguments": [
+                        "-lc",
+                        "mise x -- java --add-exports jdk.compiler/com.sun.tools.javac.api=ALL-UNNAMED --add-exports jdk.compiler/com.sun.tools.javac.code=ALL-UNNAMED --add-exports jdk.compiler/com.sun.tools.javac.file=ALL-UNNAMED --add-exports jdk.compiler/com.sun.tools.javac.parser=ALL-UNNAMED --add-exports jdk.compiler/com.sun.tools.javac.tree=ALL-UNNAMED --add-exports jdk.compiler/com.sun.tools.javac.util=ALL-UNNAMED -cp \"$HOME/.m2/repository/com/google/googlejavaformat/google-java-format/1.35.0/google-java-format-1.35.0.jar:$HOME/.m2/repository/com/google/guava/guava/32.1.3-jre/guava-32.1.3-jre.jar\" com.google.googlejavaformat.java.Main -",
+                    ],
+                },
+            },
+            "format_on_save": "on",
+        },
+    },
+    "lsp": {
+        "eslint": {
+            "settings": {
+                "workingDirectory": {
+                    "mode": "auto",
+                },
+            },
+        },
+    },
+}

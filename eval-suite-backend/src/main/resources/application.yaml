@@ -1,0 +1,26 @@
+spring:
+    datasource:
+        url: jdbc:postgresql://localhost:5433/eval_suite
+        username: eval_suite
+        password: eval_suite
+        driver-class-name: org.postgresql.Driver
+
+    jpa:
+        hibernate:
+            ddl-auto: update
+        open-in-view: false
+
+    ai:
+        model:
+            chat: none
+            embedding: none
+            image: none
+            moderation: none
+            audio:
+                speech: none
+                transcription: none
+
+management:
+    health:
+        redis:
+            enabled: false
