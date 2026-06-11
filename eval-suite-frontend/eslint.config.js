@@ -20,7 +20,7 @@ module.exports = tseslint.config(
         'error',
         {
           type: 'element',
-          prefix: 'evl',
+          prefix: ['evl', 'z'],
           style: 'kebab-case',
         },
       ],
@@ -28,11 +28,26 @@ module.exports = tseslint.config(
         'error',
         {
           type: 'attribute',
-          prefix: 'evl',
+          prefix: ['evl'],
           style: 'camelCase',
         },
       ],
       '@angular-eslint/prefer-standalone': 'error',
+    },
+  },
+  {
+    files: ['src/app/zard/**/*.ts'],
+
+    rules: {
+      '@angular-eslint/component-selector': 'off',
+      '@angular-eslint/directive-selector': 'off',
+      '@typescript-eslint/no-unused-vars': [
+        'error',
+        {
+          argsIgnorePattern: '^_',
+          varsIgnorePattern: '^_',
+        },
+      ],
     },
   },
   {
