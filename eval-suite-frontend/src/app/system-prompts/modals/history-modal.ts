@@ -11,9 +11,7 @@ import {
 import { NgIcon, provideIcons } from '@ng-icons/core';
 import { lucideArchive, lucideSquarePen, lucideX } from '@ng-icons/lucide';
 
-import { ZardBadgeComponent } from '@/shared/badge';
 import { ZardButtonComponent } from '@/shared/button';
-import { ZardCardComponent } from '@/shared/card';
 
 import { type SystemPrompt } from '../system-prompts-api';
 import { SystemPromptsStore } from '../system-prompts-store';
@@ -27,9 +25,7 @@ import { SystemPromptContentModal } from './content-modal';
     DatePipe,
     NgIcon,
     SystemPromptContentModal,
-    ZardBadgeComponent,
     ZardButtonComponent,
-    ZardCardComponent,
   ],
   providers: [provideIcons({ lucideArchive, lucideSquarePen, lucideX })],
   changeDetection: ChangeDetectionStrategy.OnPush,
@@ -37,10 +33,15 @@ import { SystemPromptContentModal } from './content-modal';
     <div
       class="fixed inset-0 z-50 flex items-center justify-center bg-background/80 p-4 backdrop-blur-sm">
       <section
-        class="flex max-h-[85vh] w-full max-w-3xl flex-col overflow-hidden rounded-xl border bg-card shadow-lg">
-        <header class="flex items-start justify-between gap-4 border-b px-6 py-4">
+        role="dialog"
+        aria-modal="true"
+        aria-labelledby="promptVersionHistoryModalTitle"
+        class="flex max-h-[88vh] w-full max-w-4xl flex-col overflow-hidden rounded-xl border bg-card shadow-lg">
+        <header class="flex items-start justify-between gap-4 border-b px-7 py-5">
           <div class="space-y-1">
-            <h2 class="text-lg font-semibold text-foreground">Version History</h2>
+            <h2 id="promptVersionHistoryModalTitle" class="text-lg font-semibold text-foreground">
+              Version History
+            </h2>
 
             <p class="text-sm text-muted-foreground">
               {{ familyName() }}
@@ -53,7 +54,7 @@ import { SystemPromptContentModal } from './content-modal';
           </button>
         </header>
 
-        <div class="flex-1 overflow-y-auto p-6">
+        <div class="flex-1 overflow-y-auto px-7 py-8">
           @if (store.isLoadingHistory()) {
             <div class="flex min-h-72 flex-col items-center justify-center">
               <div
@@ -61,48 +62,35 @@ import { SystemPromptContentModal } from './content-modal';
               <p class="mt-4 text-sm text-muted-foreground">Fetching history...</p>
             </div>
           } @else {
-            <div
-              class="relative space-y-5 before:absolute before:bottom-4 before:left-4 before:top-4 before:w-px before:bg-border">
+            <div class="space-y-8">
               @for (version of store.history(); track version.id) {
                 @let isArchived = version.deletedAt !== null;
 
-                <article class="relative pl-10">
+                <article class="border-b pb-8 last:border-b-0 last:pb-0">
                   <div
-                    class="absolute left-[9px] top-4 h-3.5 w-3.5 rounded-full border-2 border-background"
-                    [class.bg-foreground]="!isArchived"
-                    [class.bg-muted-foreground]="isArchived"></div>
+                    class="mb-4 flex flex-col gap-2 sm:flex-row sm:items-start sm:justify-between">
+                    <div class="flex items-center gap-2">
+                      <h3 class="text-sm font-medium text-foreground">
+                        v{{ version.versionNumber }}
+                      </h3>
 
-                  <z-card class="bg-background py-5" [class.opacity-60]="isArchived">
-                    <div
-                      class="mb-4 flex flex-col gap-2 sm:flex-row sm:items-start sm:justify-between">
-                      <div class="flex items-center gap-2">
-                        <z-badge zType="secondary" class="h-5 px-1.5 text-xs font-medium">
-                          v{{ version.versionNumber }}
-                        </z-badge>
-
-                        @if (isArchived) {
-                          <z-badge
-                            zType="outline"
-                            class="h-5 px-1.5 text-[10px] font-medium text-muted-foreground">
-                            Archived
-                          </z-badge>
-                        }
-                      </div>
-
-                      <time class="text-xs text-muted-foreground">
-                        {{ version.createdAt | date: 'medium' }}
-                      </time>
+                      @if (isArchived) {
+                        <span class="text-xs text-muted-foreground">Archived</span>
+                      }
                     </div>
 
-                    <div
-                      class="max-h-52 overflow-y-auto font-mono text-xs leading-5 text-muted-foreground">
-                      <p class="break-words">
-                        {{ version.preview }}
-                        @if (version.content.length > 100) {
-                          <span>...</span>
-                        }
-                      </p>
-                    </div>
+                    <time class="text-xs text-muted-foreground">
+                      {{ version.createdAt | date: 'medium' }}
+                    </time>
+                  </div>
+
+                  <div class="rounded-lg border border-input bg-transparent p-4 dark:bg-input/30">
+                    <p class="break-words font-mono text-xs leading-6 text-foreground">
+                      {{ version.preview }}
+                      @if (version.content.length > 100) {
+                        <span>...</span>
+                      }
+                    </p>
 
                     @if (version.content.length > 100) {
                       <div class="mt-3 flex justify-end">
@@ -116,7 +104,7 @@ import { SystemPromptContentModal } from './content-modal';
                         </button>
                       </div>
                     }
-                  </z-card>
+                  </div>
                 </article>
               }
             </div>
@@ -124,7 +112,7 @@ import { SystemPromptContentModal } from './content-modal';
         </div>
 
         @if (currentPrompt(); as prompt) {
-          <footer class="flex items-center justify-end gap-2 border-t px-6 py-4">
+          <footer class="flex items-center justify-end gap-2 border-t px-7 py-4">
             <button
               z-button
               zType="outline"

@@ -1,0 +1,1 @@
+The CLAUDE.md content is located in `AGENTS.md` in this repo's root.

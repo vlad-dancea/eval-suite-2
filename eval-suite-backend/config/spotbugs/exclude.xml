@@ -1,0 +1,29 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<FindBugsFilter
+    xmlns="https://github.com/spotbugs/filter/3.0.0"
+    xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+    xsi:schemaLocation="https://github.com/spotbugs/filter/3.0.0 https://raw.githubusercontent.com/spotbugs/spotbugs/master/spotbugs/etc/findbugsfilter.xsd">
+
+  <!--
+    SpotBugs misreads Java record components as unused private fields
+    (UUF_UNUSED_FIELD) because they are only accessed through generated
+    accessor methods. Our request/response DTOs are records, so this is a
+    false positive across the whole application package.
+  -->
+  <Match>
+    <Bug pattern="UUF_UNUSED_FIELD" />
+    <Package name="~com\.group34\.eval_suite\..*" />
+  </Match>
+
+  <!--
+    Constructor-injected Spring beans (services, controllers) keep their
+    injected collaborators in final fields used only by instance methods.
+    SpotBugs flags both the field as unused and the constructor as
+    potentially partially-initialized; both are false positives here.
+  -->
+  <Match>
+    <Bug pattern="CT_CONSTRUCTOR_THROW" />
+    <Package name="~com\.group34\.eval_suite\..*" />
+  </Match>
+
+</FindBugsFilter>

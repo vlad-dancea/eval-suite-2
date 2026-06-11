@@ -3,8 +3,8 @@
     - System prompts can get quite long so there should be a character limit of 5000 characters. This also means that the frontend should display only the first 100 characters of the System Prompt in the UI, with an option to expand and view the full prompt if needed.
 2. Users need to be able to save and delete Datasets and use them in runs.
     - Datasets are pairs of input and expected output data.
-    - The input is sent along with the system prompt to the model.
-    - The input, actual output, expected output and the system prompt are all stored in the database for each run.
+    - The datasets are also immutable, meaning that once they are created, they cannot be edited. This is important for versioning and tracking changes over time, just like with System Prompts. If users could edit datasets, it would make it difficult to track the history of changes and improvements.
+    - Inputs and outputs are capped at 5000 characters as well
 3. Users need to be able to create and delete Runs, which are combinations of a System Prompt and a Dataset.
     - The dataset input, model output, expected output and the system prompt are sent to a judge model this way:
     - The judge model is a separate model that evaluates the output of the main model based on the input, output and expected output. It then gives a grade as a percentage score from 0 to 100, where 100 means the output is perfect and 0 means it is completely wrong. A second message is sent in the conversation with the system prompt that was used in the run and the judge model is asked to give the system prompt both a grade from 0 to 100, an explanation and a suggestion for improvement.

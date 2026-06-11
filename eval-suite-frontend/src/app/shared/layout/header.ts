@@ -27,7 +27,7 @@ import { ZardDarkMode } from '@/zard/services';
           aria-label="EvalSuite home">
           <div
             class="flex h-8 w-8 items-center justify-center rounded-lg border bg-card text-card-foreground shadow-sm">
-            <ng-icon name="lucideFileText" class="h-4 w-4" aria-hidden="true" />
+            <ng-icon name="lucideFileText" aria-hidden="true" />
           </div>
 
           <span class="text-sm font-semibold tracking-tight text-foreground"> EvalSuite </span>
@@ -49,14 +49,12 @@ import { ZardDarkMode } from '@/zard/services';
             </a>
 
             <a
-              routerLink="/todo"
+              routerLink="/datasets"
               routerLinkActive="bg-accent text-accent-foreground"
               z-button
-              zDisabled="true"
-              zType="ghost"
-              zSize="lg">
+              zSize="lg"
+              zType="ghost">
               Datasets
-              <z-badge zType="outline" class="h-5 px-1.5 text-[10px] font-medium"> Soon </z-badge>
             </a>
 
             <a
@@ -81,9 +79,9 @@ import { ZardDarkMode } from '@/zard/services';
             [attr.aria-label]="themeLabel()"
             [title]="themeLabel()">
             @if (isDark()) {
-              <ng-icon name="lucideSun" class="h-4 w-4" aria-hidden="true" />
+              <ng-icon name="lucideSun" aria-hidden="true" />
             } @else {
-              <ng-icon name="lucideMoon" class="h-4 w-4" aria-hidden="true" />
+              <ng-icon name="lucideMoon" aria-hidden="true" />
             }
           </button>
         </div>

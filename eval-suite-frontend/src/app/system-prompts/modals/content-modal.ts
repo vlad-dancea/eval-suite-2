@@ -3,14 +3,13 @@ import { ChangeDetectionStrategy, Component, input, output } from '@angular/core
 import { NgIcon, provideIcons } from '@ng-icons/core';
 import { lucideX } from '@ng-icons/lucide';
 
-import { ZardBadgeComponent } from '@/shared/badge';
 import { ZardButtonComponent } from '@/shared/button';
 
 import { type SystemPrompt } from '../system-prompts-api';
 
 @Component({
   selector: 'evl-system-prompt-content-modal',
-  imports: [DatePipe, NgIcon, ZardBadgeComponent, ZardButtonComponent],
+  imports: [DatePipe, NgIcon, ZardButtonComponent],
   providers: [provideIcons({ lucideX })],
   changeDetection: ChangeDetectionStrategy.OnPush,
   template: `
@@ -20,36 +19,34 @@ import { type SystemPrompt } from '../system-prompts-api';
         role="dialog"
         aria-modal="true"
         aria-labelledby="promptContentModalTitle"
-        class="flex max-h-[85vh] w-full max-w-3xl flex-col overflow-hidden rounded-xl border bg-card shadow-lg">
-        <header class="flex items-start justify-between gap-4 border-b px-6 py-4">
-          <div class="min-w-0 space-y-2">
-            <div class="flex items-center gap-2">
-              <z-badge zType="secondary" class="h-5 px-1.5 text-xs font-medium">
-                v{{ prompt().versionNumber }}
-              </z-badge>
-
-              <time class="text-xs text-muted-foreground">
-                {{ prompt().createdAt | date: 'medium' }}
-              </time>
-            </div>
-
+        class="flex max-h-[88vh] w-full max-w-4xl flex-col overflow-hidden rounded-xl border bg-card shadow-lg">
+        <header class="flex items-start justify-between gap-4 border-b px-7 py-5">
+          <div class="min-w-0 space-y-1">
             <h2
               id="promptContentModalTitle"
               class="truncate text-lg font-semibold text-foreground"
               [title]="prompt().name">
               {{ prompt().name }}
             </h2>
+
+            <div class="flex items-center gap-2 text-xs text-muted-foreground">
+              <span>v{{ prompt().versionNumber }}</span>
+              <span aria-hidden="true">/</span>
+              <time>
+                {{ prompt().createdAt | date: 'medium' }}
+              </time>
+            </div>
           </div>
 
           <button z-button zType="outline" type="button" (click)="dismissed.emit()">
-            <ng-icon name="lucideX" class="h-4 w-4" aria-hidden="true" />
+            <ng-icon name="lucideX" aria-hidden="true" />
             Close
           </button>
         </header>
 
-        <div class="flex-1 overflow-y-auto p-6">
+        <div class="flex-1 overflow-y-auto px-7 py-8">
           <p
-            class="whitespace-pre-wrap break-words font-mono text-sm leading-6 text-muted-foreground">
+            class="mx-auto max-w-3xl whitespace-pre-wrap break-words rounded-lg border border-input bg-transparent p-5 font-mono text-xs leading-6 text-foreground dark:bg-input/30">
             {{ prompt().content }}
           </p>
         </div>

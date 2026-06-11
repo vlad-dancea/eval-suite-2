@@ -4,10 +4,10 @@ import { lucideArchive, lucideTriangleAlert, lucideX } from '@ng-icons/lucide';
 
 import { ZardButtonComponent } from '@/shared/button';
 
-import { type SystemPrompt } from '../system-prompts-api';
+import { type DatasetSummary } from '../datasets-api';
 
 @Component({
-  selector: 'evl-system-prompt-archive-modal',
+  selector: 'evl-dataset-delete-modal',
   imports: [NgIcon, ZardButtonComponent],
   providers: [provideIcons({ lucideArchive, lucideTriangleAlert, lucideX })],
   changeDetection: ChangeDetectionStrategy.OnPush,
@@ -17,17 +17,17 @@ import { type SystemPrompt } from '../system-prompts-api';
       <section
         role="dialog"
         aria-modal="true"
-        aria-labelledby="archivePromptModalTitle"
-        aria-describedby="archivePromptModalDescription"
+        aria-labelledby="deleteDatasetModalTitle"
+        aria-describedby="deleteDatasetModalDescription"
         class="flex w-full max-w-lg flex-col overflow-hidden rounded-xl border bg-card shadow-lg">
         <header class="flex items-start justify-between gap-4 border-b px-7 py-5">
           <div class="min-w-0 space-y-1">
-            <h2 id="archivePromptModalTitle" class="text-lg font-semibold text-foreground">
-              Archive prompt history?
+            <h2 id="deleteDatasetModalTitle" class="text-lg font-semibold text-foreground">
+              Archive this dataset?
             </h2>
 
-            <p class="truncate text-sm text-muted-foreground" [title]="prompt().name">
-              {{ prompt().name }}
+            <p class="truncate text-sm text-muted-foreground" [title]="dataset().name">
+              {{ dataset().name }}
             </p>
           </div>
 
@@ -37,7 +37,7 @@ import { type SystemPrompt } from '../system-prompts-api';
           </button>
         </header>
 
-        <div id="archivePromptModalDescription" class="space-y-4 px-7 py-6 text-sm leading-6">
+        <div id="deleteDatasetModalDescription" class="space-y-4 px-7 py-6 text-sm leading-6">
           <div
             class="flex items-start gap-3 rounded-lg border border-destructive/30 bg-destructive/5 p-4">
             <ng-icon
@@ -46,13 +46,12 @@ import { type SystemPrompt } from '../system-prompts-api';
               aria-hidden="true" />
 
             <p class="text-foreground">
-              The entire history of this prompt will be deleted and will no longer be available for
-              use in new runs.
+              This dataset will no longer be available for use in new runs.
             </p>
           </div>
 
           <p class="text-xs leading-5 text-muted-foreground">
-            When looking at old runs, the prompt text will still be visible.
+            Existing runs that already used this dataset are not affected.
           </p>
 
           <p class="font-medium text-foreground">Do you want to continue?</p>
@@ -63,15 +62,15 @@ import { type SystemPrompt } from '../system-prompts-api';
 
           <button z-button zType="destructive" type="button" (click)="confirmed.emit()">
             <ng-icon name="lucideArchive" aria-hidden="true" />
-            Continue
+            Archive
           </button>
         </footer>
       </section>
     </div>
   `,
 })
-export class ArchiveConfirmationModal {
-  readonly prompt = input.required<SystemPrompt>();
+export class DatasetDeleteModal {
+  readonly dataset = input.required<DatasetSummary>();
   readonly confirmed = output<void>();
   readonly dismissed = output<void>();
 }

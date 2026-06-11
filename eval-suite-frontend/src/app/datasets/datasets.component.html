@@ -1,0 +1,142 @@
+<div class="space-y-6">
+  <!-- Page Header -->
+  <section class="flex justify-between items-center">
+    <div>
+      <h1 class="text-2xl font-semibold tracking-tight text-foreground sm:text-3xl">Datasets</h1>
+
+      <p class="max-w-2xl text-sm leading-5 text-muted-foreground mt-2">
+        Immutable collections of input and expected-output pairs. <br />
+        Reuse them across runs to evaluate prompts consistently.
+      </p>
+    </div>
+
+    <button type="button" z-button zType="outline" zSize="lg" (click)="openCreateModal()">
+      <ng-icon name="lucidePlus" />
+      New Dataset
+    </button>
+  </section>
+
+  <z-divider />
+
+  <!-- Main Content Area -->
+  @if (store.isLoadingActiveDatasets()) {
+    <section class="grid grid-cols-3 gap-4">
+      <evl-dataset-skeleton-card />
+      <evl-dataset-skeleton-card />
+      <evl-dataset-skeleton-card />
+    </section>
+  } @else if (store.activeDatasetsError()) {
+    <z-card class="mx-auto max-w-2xl border-destructive/30 bg-destructive/5 text-center">
+      <div
+        class="mx-auto flex h-10 w-10 items-center justify-center rounded-full bg-destructive/10 text-destructive">
+        <ng-icon name="lucideTriangleAlert" class="h-5 w-5" aria-hidden="true" />
+      </div>
+
+      <h2 class="mt-4 text-lg font-semibold text-foreground">Error loading datasets</h2>
+
+      <p class="mt-2 text-sm leading-5 text-muted-foreground">
+        Could not connect to the backend server. <br />
+        Please make sure the backend application is running.
+      </p>
+
+      <button
+        z-button
+        zType="outline"
+        type="button"
+        (click)="store.reloadActiveDatasets()"
+        class="mt-4">
+        <ng-icon name="lucideRefreshCw" aria-hidden="true" />
+        Retry
+      </button>
+    </z-card>
+  } @else {
+    @if (store.activeDatasets().length === 0) {
+      <z-card class="mx-auto max-w-xl text-center">
+        <div
+          class="mx-auto flex h-10 w-10 items-center justify-center rounded-full bg-muted text-muted-foreground">
+          <ng-icon name="lucideDatabase" class="h-5 w-5" aria-hidden="true" />
+        </div>
+
+        <h2 class="mt-4 text-lg font-semibold text-foreground">No datasets yet</h2>
+
+        <p class="mt-2 text-sm leading-6 text-muted-foreground">
+          Get started by creating your first dataset of test cases.
+        </p>
+
+        <button z-button type="button" (click)="openCreateModal()" class="mt-6 gap-2">
+          <ng-icon name="lucidePlus" aria-hidden="true" />
+          Create Dataset
+        </button>
+      </z-card>
+    } @else {
+      <!-- Dataset Grid -->
+      <section class="grid grid-cols-3 gap-4">
+        @for (dataset of store.activeDatasets(); track dataset.id) {
+          <z-card
+            [zFooterBorder]="true"
+            class="group min-h-56 justify-between cursor-pointer transition-all duration-200 hover:scale-[1.02] hover:bg-muted/60 active:scale-[1.01]"
+            (click)="openViewModal(dataset)">
+            <div class="space-y-4">
+              <div class="flex items-start justify-between gap-3">
+                <z-badge zType="secondary" class="h-5 px-1.5 text-xs font-medium">
+                  {{ dataset.itemCount }} {{ dataset.itemCount === 1 ? 'item' : 'items' }}
+                </z-badge>
+
+                <time class="shrink-0 text-xs text-muted-foreground">
+                  {{ dataset.createdAt | date: 'short' }}
+                </time>
+              </div>
+
+              <h2 class="truncate text-base font-semibold text-foreground" [title]="dataset.name">
+                {{ dataset.name }}
+              </h2>
+            </div>
+
+            <!-- Card Actions -->
+            <div card-footer class="flex w-full items-center justify-between">
+              <button
+                z-button
+                zType="outline"
+                zSize="sm"
+                type="button"
+                (click)="$event.stopPropagation(); openViewModal(dataset)">
+                <ng-icon name="lucideEye" />
+                View
+              </button>
+
+              <button
+                z-button
+                zType="outline"
+                zSize="sm"
+                type="button"
+                (click)="$event.stopPropagation(); openDeleteModal(dataset)"
+                class="text-destructive hover:text-destructive">
+                <ng-icon name="lucideArchive" />
+                <span>Archive</span>
+              </button>
+            </div>
+          </z-card>
+        }
+      </section>
+    }
+  }
+
+  @if (showCreateModal()) {
+    <evl-dataset-create-modal (dismissed)="closeCreateModal()" />
+  }
+
+  @if (showViewModal()) {
+    @if (selectedDataset(); as dataset) {
+      <evl-dataset-view-modal [datasetName]="dataset.name" (dismissed)="closeViewModal()" />
+    }
+  }
+
+  @if (showDeleteModal()) {
+    @if (selectedDataset(); as dataset) {
+      <evl-dataset-delete-modal
+        [dataset]="dataset"
+        (confirmed)="confirmDeleteDataset()"
+        (dismissed)="closeDeleteModal()" />
+    }
+  }
+</div>

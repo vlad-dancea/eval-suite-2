@@ -17,7 +17,7 @@ import { ZardButtonComponent } from '@/shared/button';
 import { ZardDividerComponent } from '@/shared/divider';
 import { SystemPromptCreateModal } from './modals/create-modal';
 import { SystemPromptNewVersionModal } from './modals/new-version-modal';
-import { SystemPromptVersionModal } from './modals/version-modal';
+import { SystemPromptVersionModal } from './modals/history-modal';
 import { ZardCardComponent } from '@/shared/card';
 import { SkeletonCardComponent } from './skeleton-card';
 import { SystemPromptContentModal } from './modals/content-modal';

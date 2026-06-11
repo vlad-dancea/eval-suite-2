@@ -12,93 +12,112 @@ import { NgIcon, provideIcons } from '@ng-icons/core';
 import { lucideX } from '@ng-icons/lucide';
 
 import { ZardButtonComponent } from '@/shared/button';
+import { ZardInputDirective } from '@/shared/input';
 
 import { type SystemPromptRequest } from '../system-prompts-api';
 import { SystemPromptsStore } from '../system-prompts-store';
 
 @Component({
   selector: 'evl-system-prompt-create-modal',
-  imports: [FormField, NgIcon, ZardButtonComponent],
+  imports: [FormField, NgIcon, ZardButtonComponent, ZardInputDirective],
   providers: [provideIcons({ lucideX })],
   changeDetection: ChangeDetectionStrategy.OnPush,
   template: `
     <div
       class="fixed inset-0 z-50 flex items-center justify-center bg-background/80 p-4 backdrop-blur-sm">
       <section
-        class="flex max-h-[90vh] w-full max-w-lg flex-col overflow-hidden rounded-xl border bg-card shadow-lg">
-        <header class="flex items-start justify-between gap-4 border-b px-6 py-4">
+        role="dialog"
+        aria-modal="true"
+        aria-labelledby="systemPromptCreateModalTitle"
+        class="flex max-h-[88vh] w-full max-w-2xl flex-col overflow-hidden rounded-xl border bg-card shadow-lg">
+        <header class="flex items-start justify-between gap-4 border-b px-7 py-5">
           <div class="space-y-1">
-            <h2 class="text-lg font-semibold text-foreground">Create System Prompt</h2>
-
-            <p class="text-sm text-muted-foreground">Add a new prompt.</p>
+            <h2 id="systemPromptCreateModalTitle" class="text-lg font-semibold text-foreground">
+              Create System Prompt
+            </h2>
           </div>
-
-          <button z-button zType="outline" type="button" (click)="dismiss()">
-            <ng-icon name="lucideX" class="h-4 w-4" aria-hidden="true" />
-            Close
-          </button>
         </header>
 
         <form
+          novalidate
           (submit)="onSubmit(); $event.preventDefault()"
-          class="flex-1 space-y-6 overflow-y-auto p-6">
-          @if (displayErrorMessage()) {
-            <div
-              role="alert"
-              class="rounded-lg border border-destructive/30 bg-destructive/5 px-4 py-3 text-sm text-destructive">
-              {{ displayErrorMessage() }}
-            </div>
-          }
+          class="flex min-h-0 flex-1 flex-col">
+          <div class="flex-1 space-y-6 overflow-y-auto p-7">
+            @if (displayErrorMessage()) {
+              <div
+                role="alert"
+                class="rounded-lg border border-destructive/30 bg-destructive/5 px-4 py-3 text-sm text-destructive">
+                {{ displayErrorMessage() }}
+              </div>
+            }
 
-          <div class="space-y-5">
-            <div class="space-y-2">
-              <label for="promptNameInput" class="text-sm font-medium text-foreground">
-                Name
-              </label>
-
-              <input
-                id="promptNameInput"
-                type="text"
-                [formField]="promptForm.name"
-                placeholder="e.g. Chatbot Assistant"
-                class="flex h-10 w-full rounded-md border bg-background px-3 py-2 text-sm text-foreground shadow-sm outline-none transition-colors placeholder:text-muted-foreground focus-visible:ring-2 focus-visible:ring-ring disabled:cursor-not-allowed disabled:opacity-50" />
-
-              @if (promptForm.name().touched() && promptForm.name().errors().length) {
-                <p class="text-xs text-destructive">
-                  {{ promptForm.name().errors()[0].message }}
-                </p>
-              }
-            </div>
-
-            <div class="space-y-2">
-              <div class="flex items-center justify-between gap-3">
-                <label for="promptContentInput" class="text-sm font-medium text-foreground">
-                  System Prompt Content
+            <div class="space-y-5">
+              <div class="space-y-2">
+                <label for="promptNameInput" class="text-sm font-medium text-foreground">
+                  Name
                 </label>
 
-                <span
-                  class="text-xs text-muted-foreground"
-                  [class.text-destructive]="contentLength() > 5000">
-                  {{ contentLength() }} / 5000
-                </span>
+                <input
+                  z-input
+                  id="promptNameInput"
+                  type="text"
+                  [formField]="promptForm.name"
+                  [zStatus]="
+                    validationStatus(
+                      promptForm.name().touched() && promptForm.name().errors().length > 0
+                    )
+                  "
+                  placeholder="e.g. Chatbot Assistant"
+                  [attr.aria-invalid]="promptForm.name().errors().length ? 'true' : null" />
+
+                @if (promptForm.name().touched() && promptForm.name().errors().length) {
+                  <p class="text-xs text-destructive">
+                    {{ promptForm.name().errors()[0].message }}
+                  </p>
+                }
               </div>
 
-              <textarea
-                id="promptContentInput"
-                rows="9"
-                [formField]="promptForm.content"
-                placeholder="Write the LLM system prompt instructions here..."
-                class="flex min-h-52 w-full resize-y rounded-md border bg-background px-3 py-2 font-mono text-sm leading-6 text-foreground shadow-sm outline-none transition-colors placeholder:text-muted-foreground focus-visible:ring-2 focus-visible:ring-ring disabled:cursor-not-allowed disabled:opacity-50"></textarea>
+              <div class="space-y-2">
+                <div class="flex items-center justify-between gap-3">
+                  <label for="promptContentInput" class="text-sm font-medium text-foreground">
+                    System Prompt Content
+                  </label>
 
-              @if (promptForm.content().touched() && promptForm.content().errors().length) {
-                <p class="text-xs text-destructive">
-                  {{ promptForm.content().errors()[0].message }}
-                </p>
-              }
+                  <span
+                    class="text-xs text-muted-foreground"
+                    [class.text-destructive]="contentLength() > 5000">
+                    {{ contentLength() }} / 5000
+                  </span>
+                </div>
+
+                <textarea
+                  z-input
+                  id="promptContentInput"
+                  rows="9"
+                  [formField]="promptForm.content"
+                  [zStatus]="
+                    validationStatus(
+                      (promptForm.content().touched() &&
+                        promptForm.content().errors().length > 0) ||
+                        contentLength() > 5000
+                    )
+                  "
+                  placeholder="You are a chat assistant for..."
+                  class="min-h-64 resize-y font-mono text-sm leading-6"
+                  [attr.aria-invalid]="
+                    promptForm.content().errors().length ? 'true' : null
+                  "></textarea>
+
+                @if (promptForm.content().touched() && promptForm.content().errors().length) {
+                  <p class="text-xs text-destructive">
+                    {{ promptForm.content().errors()[0].message }}
+                  </p>
+                }
+              </div>
             </div>
           </div>
 
-          <footer class="flex items-center justify-end gap-2 border-t pt-6">
+          <footer class="flex items-center justify-end gap-2 border-t px-7 py-4">
             <button z-button zType="outline" type="button" (click)="dismiss()">Cancel</button>
 
             <button
@@ -146,6 +165,10 @@ export class SystemPromptCreateModal implements OnInit {
   protected readonly displayErrorMessage = computed(() => {
     return this.store.createError() ?? '';
   });
+
+  protected validationStatus(hasError: boolean): 'error' | undefined {
+    return hasError ? 'error' : undefined;
+  }
 
   ngOnInit(): void {
     this.store.clearCreateError();
