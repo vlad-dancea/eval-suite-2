@@ -10,6 +10,10 @@ spring:
             ddl-auto: update
         open-in-view: false
 
+    sql:
+        init:
+            mode: always
+
     ai:
         model:
             chat: none
