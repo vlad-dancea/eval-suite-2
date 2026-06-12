@@ -1,10 +1,5 @@
-package com.group34.eval_suite.controller;
+package com.group34.eval_suite.datasets;
 
-import com.group34.eval_suite.dto.DatasetRequest;
-import com.group34.eval_suite.dto.DatasetResponse;
-import com.group34.eval_suite.dto.DatasetSummaryResponse;
-import com.group34.eval_suite.model.Dataset;
-import com.group34.eval_suite.service.DatasetService;
 import jakarta.validation.Valid;
 import java.util.List;
 import java.util.UUID;
@@ -23,7 +18,7 @@ import org.springframework.web.bind.annotation.RestController;
 @RestController
 @RequiredArgsConstructor
 @RequestMapping("/api/datasets")
-@CrossOrigin(origins = "*") // Allow requests from all origins (e.g. frontend dev server)
+@CrossOrigin(origins = "*")
 @SuppressWarnings("PMD.ShortVariable")
 public class DatasetController {
 

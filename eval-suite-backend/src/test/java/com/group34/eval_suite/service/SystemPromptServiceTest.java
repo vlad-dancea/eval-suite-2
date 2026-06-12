@@ -3,8 +3,9 @@ package com.group34.eval_suite.service;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 
-import com.group34.eval_suite.model.SystemPrompt;
-import com.group34.eval_suite.repository.SystemPromptRepository;
+import com.group34.eval_suite.systemprompts.SystemPrompt;
+import com.group34.eval_suite.systemprompts.SystemPromptRepository;
+import com.group34.eval_suite.systemprompts.SystemPromptService;
 import java.time.OffsetDateTime;
 import java.util.List;
 import java.util.UUID;

@@ -1,7 +1,5 @@
-package com.group34.eval_suite.repository;
+package com.group34.eval_suite.datasets;
 
-import com.group34.eval_suite.dto.DatasetSummaryResponse;
-import com.group34.eval_suite.model.Dataset;
 import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
@@ -15,8 +13,8 @@ import org.springframework.stereotype.Repository;
 public interface DatasetRepository extends JpaRepository<Dataset, UUID> {
 
   /**
-   * List all active datasets as lightweight summaries with their item counts.
-   * A dataset is active when deleted_at is null.
+   * List all active datasets as lightweight summaries with their item counts. A dataset is active
+   * when deleted_at is null.
    */
   @Query(
       """
@@ -27,9 +25,7 @@ public interface DatasetRepository extends JpaRepository<Dataset, UUID> {
       """)
   List<DatasetSummaryResponse> findActiveSummaries();
 
-  /**
-   * Fetch a single active dataset together with all of its items.
-   */
+  /** Fetch a single active dataset together with all of its items. */
   @Query(
       """
           SELECT DISTINCT d FROM Dataset d

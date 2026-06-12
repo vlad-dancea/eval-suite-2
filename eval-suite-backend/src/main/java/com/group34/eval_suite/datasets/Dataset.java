@@ -1,4 +1,4 @@
-package com.group34.eval_suite.model;
+package com.group34.eval_suite.datasets;
 
 import jakarta.persistence.CascadeType;
 import jakarta.persistence.Column;

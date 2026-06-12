@@ -1,6 +1,5 @@
-package com.group34.eval_suite.dto;
+package com.group34.eval_suite.datasets;
 
-import com.group34.eval_suite.model.DatasetItem;
 import java.util.UUID;
 
 @SuppressWarnings({"PMD.ShortVariable", "PMD.LongVariable"})

@@ -8,8 +8,6 @@ import {
   signal,
 } from '@angular/core';
 import { FormField, form, maxLength, required, submit } from '@angular/forms/signals';
-import { NgIcon, provideIcons } from '@ng-icons/core';
-import { lucideX } from '@ng-icons/lucide';
 
 import { ZardButtonComponent } from '@/shared/button';
 import { ZardInputDirective } from '@/shared/input';
@@ -19,8 +17,7 @@ import { SystemPromptsStore } from '../system-prompts-store';
 
 @Component({
   selector: 'evl-system-prompt-create-modal',
-  imports: [FormField, NgIcon, ZardButtonComponent, ZardInputDirective],
-  providers: [provideIcons({ lucideX })],
+  imports: [FormField, ZardButtonComponent, ZardInputDirective],
   changeDetection: ChangeDetectionStrategy.OnPush,
   template: `
     <div

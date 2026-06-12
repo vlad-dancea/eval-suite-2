@@ -26,4 +26,22 @@
     <Package name="~com\.group34\.eval_suite\..*" />
   </Match>
 
+  <!--
+    The Aqueduct client stores Spring Boot's singleton Jackson mapper. The
+    mapper is container-managed application infrastructure, not caller-owned
+    mutable state crossing an API boundary.
+  -->
+  <Match>
+    <Bug pattern="EI_EXPOSE_REP2" />
+    <Class name="com.group34.eval_suite.runs.AqueductLlmClient" />
+    <Field name="objectMapper" />
+  </Match>
+
+  <!-- Spring-managed transaction infrastructure injected into a service. -->
+  <Match>
+    <Bug pattern="EI_EXPOSE_REP2" />
+    <Class name="com.group34.eval_suite.runs.RunProcessor" />
+    <Field name="txTemplate" />
+  </Match>
+
 </FindBugsFilter>

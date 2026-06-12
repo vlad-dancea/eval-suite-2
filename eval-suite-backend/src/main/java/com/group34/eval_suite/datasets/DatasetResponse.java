@@ -1,6 +1,5 @@
-package com.group34.eval_suite.dto;
+package com.group34.eval_suite.datasets;
 
-import com.group34.eval_suite.model.Dataset;
 import java.time.OffsetDateTime;
 import java.util.List;
 import java.util.UUID;

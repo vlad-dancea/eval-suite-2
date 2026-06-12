@@ -1,10 +1,5 @@
-package com.group34.eval_suite.service;
+package com.group34.eval_suite.datasets;
 
-import com.group34.eval_suite.dto.DatasetItemRequest;
-import com.group34.eval_suite.dto.DatasetSummaryResponse;
-import com.group34.eval_suite.model.Dataset;
-import com.group34.eval_suite.model.DatasetItem;
-import com.group34.eval_suite.repository.DatasetRepository;
 import java.time.OffsetDateTime;
 import java.util.List;
 import java.util.UUID;
@@ -27,9 +22,7 @@ public class DatasetService {
     this.repository = repository;
   }
 
-  /**
-   * Create a new immutable dataset together with its input/expected-output pairs.
-   */
+  /** Create a new immutable dataset together with its input/expected-output pairs. */
   @Transactional
   public Dataset createDataset(final String name, final List<DatasetItemRequest> items) {
     if (name == null || name.isBlank()) {
@@ -103,16 +96,12 @@ public class DatasetService {
         .build();
   }
 
-  /**
-   * Get all active datasets as lightweight summaries.
-   */
+  /** Get all active datasets as lightweight summaries. */
   public List<DatasetSummaryResponse> getActiveDatasets() {
     return repository.findActiveSummaries();
   }
 
-  /**
-   * Get a single active dataset with all of its items.
-   */
+  /** Get a single active dataset with all of its items. */
   @Transactional(readOnly = true)
   public Dataset getDatasetById(final UUID id) {
     return repository
@@ -120,9 +109,7 @@ public class DatasetService {
         .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Dataset not found"));
   }
 
-  /**
-   * Soft-delete a dataset by setting its deleted_at timestamp.
-   */
+  /** Soft-delete a dataset by setting its deleted_at timestamp. */
   @Transactional
   public Dataset deleteDataset(final UUID id) {
     final Dataset dataset =

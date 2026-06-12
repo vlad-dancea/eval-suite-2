@@ -1,0 +1,327 @@
+<div class="space-y-6">
+  <section class="flex flex-col gap-4 sm:flex-row sm:items-start sm:justify-between">
+    <div>
+      <div class="flex items-center gap-2">
+        <h1 class="text-2xl font-semibold tracking-tight text-foreground sm:text-3xl">Runs</h1>
+        <z-badge
+          zType="outline"
+          class="h-6 gap-1 px-2 text-xs"
+          [class.text-chart-2]="store.liveUpdatesConnected()">
+          <ng-icon name="lucideRadio" aria-hidden="true" />
+          {{ store.liveUpdatesConnected() ? 'Live' : 'Connecting' }}
+        </z-badge>
+      </div>
+
+      <p class="mt-2 max-w-2xl text-sm leading-5 text-muted-foreground">
+        Execute prompt versions against immutable datasets and inspect judge feedback as results
+        arrive.
+      </p>
+    </div>
+
+    <button type="button" z-button zType="outline" zSize="lg" (click)="openCreateModal()">
+      <ng-icon name="lucidePlay" aria-hidden="true" />
+      New Run
+    </button>
+  </section>
+
+  <z-divider />
+
+  @if (store.isLoadingActiveRuns()) {
+    <section class="grid gap-4 lg:grid-cols-[minmax(0,0.9fr)_minmax(0,1.1fr)]">
+      <z-card class="min-h-80 animate-pulse bg-muted/40"></z-card>
+      <z-card class="min-h-80 animate-pulse bg-muted/40"></z-card>
+    </section>
+  } @else if (store.activeRunsError()) {
+    <z-card class="mx-auto max-w-2xl border-destructive/30 bg-destructive/5 text-center">
+      <div
+        class="mx-auto flex h-10 w-10 items-center justify-center rounded-full bg-destructive/10 text-destructive">
+        <ng-icon name="lucideTriangleAlert" class="h-5 w-5" aria-hidden="true" />
+      </div>
+
+      <h2 class="mt-4 text-lg font-semibold text-foreground">Error loading runs</h2>
+
+      <p class="mt-2 text-sm leading-5 text-muted-foreground">
+        Could not connect to the backend server.
+      </p>
+
+      <button
+        z-button
+        zType="outline"
+        type="button"
+        (click)="store.reloadActiveRuns()"
+        class="mt-4">
+        <ng-icon name="lucideRefreshCw" aria-hidden="true" />
+        Retry
+      </button>
+    </z-card>
+  } @else if (store.activeRuns().length === 0) {
+    <z-card class="mx-auto max-w-xl text-center">
+      <div
+        class="mx-auto flex h-10 w-10 items-center justify-center rounded-full bg-muted text-muted-foreground">
+        <ng-icon name="lucidePlay" class="h-5 w-5" aria-hidden="true" />
+      </div>
+
+      <h2 class="mt-4 text-lg font-semibold text-foreground">No runs yet</h2>
+
+      <p class="mt-2 text-sm leading-6 text-muted-foreground">
+        Start a run once you have at least one prompt and one dataset.
+      </p>
+
+      <button z-button type="button" (click)="openCreateModal()" class="mt-6 gap-2">
+        <ng-icon name="lucidePlay" aria-hidden="true" />
+        Create Run
+      </button>
+    </z-card>
+  } @else {
+    <section class="grid gap-4 lg:grid-cols-[minmax(320px,0.86fr)_minmax(0,1.14fr)]">
+      <div class="space-y-3">
+        @for (run of store.activeRuns(); track run.id) {
+          <z-card
+            [zFooterBorder]="true"
+            class="cursor-pointer transition-colors hover:bg-muted/50"
+            [class.ring-2]="store.selectedRunId() === run.id"
+            [class.ring-ring]="store.selectedRunId() === run.id"
+            (click)="selectRun(run)">
+            <div class="space-y-4">
+              <div class="flex items-start justify-between gap-3">
+                <z-badge zType="outline" class="gap-1 px-2" [class]="statusBadgeClass(run.status)">
+                  <ng-icon
+                    [name]="statusIcon(run.status)"
+                    [class.animate-spin]="run.status === 'RUNNING'"
+                    aria-hidden="true" />
+                  {{ statusLabel(run.status) }}
+                </z-badge>
+
+                <time class="shrink-0 text-xs text-muted-foreground">
+                  {{ run.createdAt | date: 'short' }}
+                </time>
+              </div>
+
+              <div class="min-w-0">
+                <h2 class="truncate text-base font-semibold text-foreground">
+                  {{ run.systemPromptName }} v{{ run.systemPromptVersionNumber }}
+                </h2>
+                <p class="mt-1 truncate text-sm text-muted-foreground" [title]="run.datasetName">
+                  {{ run.datasetName }} · {{ run.datasetItemCount }}
+                  {{ run.datasetItemCount === 1 ? 'item' : 'items' }}
+                </p>
+              </div>
+
+              <div class="grid grid-cols-2 gap-2 text-sm">
+                <div class="rounded-md border bg-muted/20 p-3">
+                  <p class="text-xs text-muted-foreground">Output score</p>
+                  <p class="mt-1 font-semibold text-foreground">
+                    {{ scoreLabel(run.averageOutputScore) }}
+                  </p>
+                </div>
+                <div class="rounded-md border bg-muted/20 p-3">
+                  <p class="text-xs text-muted-foreground">Prompt score</p>
+                  <p class="mt-1 font-semibold text-foreground">
+                    {{ scoreLabel(run.averagePromptScore) }}
+                  </p>
+                </div>
+              </div>
+
+              @if (run.errorMessage) {
+                <p
+                  class="rounded-md border border-destructive/30 bg-destructive/5 px-3 py-2 text-sm text-destructive">
+                  {{ run.errorMessage }}
+                </p>
+              }
+            </div>
+
+            <div card-footer class="flex w-full items-center justify-between">
+              <button
+                z-button
+                zType="outline"
+                zSize="sm"
+                type="button"
+                (click)="$event.stopPropagation(); selectRun(run)">
+                <ng-icon name="lucideEye" aria-hidden="true" />
+                View
+              </button>
+
+              <button
+                z-button
+                zType="outline"
+                zSize="sm"
+                type="button"
+                class="text-destructive hover:text-destructive"
+                (click)="$event.stopPropagation(); openDeleteModal(run)">
+                <ng-icon name="lucideArchive" aria-hidden="true" />
+                Archive
+              </button>
+            </div>
+          </z-card>
+        }
+      </div>
+
+      <z-card class="min-h-[32rem]">
+        @if (store.selectedRunId() === null) {
+          <div class="flex min-h-[28rem] items-center justify-center text-center">
+            <div>
+              <div
+                class="mx-auto flex h-10 w-10 items-center justify-center rounded-full bg-muted text-muted-foreground">
+                <ng-icon name="lucideEye" aria-hidden="true" />
+              </div>
+              <h2 class="mt-4 text-lg font-semibold text-foreground">Select a run</h2>
+              <p class="mt-2 text-sm text-muted-foreground">
+                Review item outputs, grades, and prompt suggestions.
+              </p>
+            </div>
+          </div>
+        } @else if (store.isLoadingDetail()) {
+          <div
+            class="flex min-h-[28rem] items-center justify-center gap-2 text-sm text-muted-foreground">
+            <ng-icon name="lucideLoaderCircle" class="animate-spin" aria-hidden="true" />
+            Loading run results
+          </div>
+        } @else if (store.detailError()) {
+          <div class="flex min-h-[28rem] items-center justify-center text-center">
+            <div>
+              <ng-icon name="lucideTriangleAlert" class="text-destructive" aria-hidden="true" />
+              <p class="mt-3 text-sm text-muted-foreground">Could not load this run.</p>
+              <button
+                z-button
+                zType="outline"
+                type="button"
+                class="mt-4"
+                (click)="store.reloadDetail()">
+                Retry
+              </button>
+            </div>
+          </div>
+        } @else if (store.selectedRun(); as run) {
+          <div class="space-y-5">
+            <div
+              class="flex flex-col gap-3 border-b pb-5 sm:flex-row sm:items-start sm:justify-between">
+              <div class="min-w-0">
+                <h2 class="truncate text-lg font-semibold text-foreground">
+                  {{ run.systemPromptName }} v{{ run.systemPromptVersionNumber }}
+                </h2>
+                <p class="mt-1 truncate text-sm text-muted-foreground" [title]="run.datasetName">
+                  {{ run.datasetName }}
+                </p>
+              </div>
+              <z-badge
+                zType="outline"
+                class="w-fit gap-1 px-2"
+                [class]="statusBadgeClass(run.status)">
+                <ng-icon
+                  [name]="statusIcon(run.status)"
+                  [class.animate-spin]="run.status === 'RUNNING'"
+                  aria-hidden="true" />
+                {{ statusLabel(run.status) }}
+              </z-badge>
+            </div>
+
+            @if (run.errorMessage) {
+              <p
+                class="rounded-md border border-destructive/30 bg-destructive/5 p-3 text-sm text-destructive">
+                {{ run.errorMessage }}
+              </p>
+            }
+
+            <div class="space-y-4">
+              @for (item of run.items; track item.id) {
+                <article class="rounded-lg border bg-background p-4">
+                  <div class="flex flex-wrap items-center justify-between gap-2">
+                    <div class="flex items-center gap-2">
+                      <z-badge zType="secondary" class="h-6 px-2 text-xs">
+                        Item {{ item.position + 1 }}
+                      </z-badge>
+                      <z-badge
+                        zType="outline"
+                        class="gap-1 px-2"
+                        [class]="statusBadgeClass(item.status)">
+                        <ng-icon
+                          [name]="statusIcon(item.status)"
+                          [class.animate-spin]="item.status === 'RUNNING'"
+                          aria-hidden="true" />
+                        {{ statusLabel(item.status) }}
+                      </z-badge>
+                    </div>
+
+                    <div class="flex gap-2 text-xs text-muted-foreground">
+                      <span>Output {{ scoreLabel(item.outputScore) }}</span>
+                      <span>Prompt {{ scoreLabel(item.promptScore) }}</span>
+                    </div>
+                  </div>
+
+                  <div class="mt-4 grid gap-3 xl:grid-cols-3">
+                    <div class="rounded-md bg-muted/30 p-3">
+                      <h3 class="text-xs font-medium uppercase text-muted-foreground">Input</h3>
+                      <p class="mt-2 whitespace-pre-wrap break-words text-sm leading-6">
+                        {{ item.input }}
+                      </p>
+                    </div>
+                    <div class="rounded-md bg-muted/30 p-3">
+                      <h3 class="text-xs font-medium uppercase text-muted-foreground">
+                        Model output
+                      </h3>
+                      <p class="mt-2 whitespace-pre-wrap break-words text-sm leading-6">
+                        {{ item.modelOutput || 'Pending' }}
+                      </p>
+                    </div>
+                    <div class="rounded-md bg-muted/30 p-3">
+                      <h3 class="text-xs font-medium uppercase text-muted-foreground">Expected</h3>
+                      <p class="mt-2 whitespace-pre-wrap break-words text-sm leading-6">
+                        {{ item.expectedOutput }}
+                      </p>
+                    </div>
+                  </div>
+
+                  @if (item.judgeExplanation || item.improvementSuggestion || item.errorMessage) {
+                    <div class="mt-3 grid gap-3 md:grid-cols-2">
+                      @if (item.judgeExplanation) {
+                        <div class="rounded-md border p-3">
+                          <h3 class="text-xs font-medium uppercase text-muted-foreground">
+                            Judge explanation
+                          </h3>
+                          <p class="mt-2 whitespace-pre-wrap break-words text-sm leading-6">
+                            {{ item.judgeExplanation }}
+                          </p>
+                        </div>
+                      }
+
+                      @if (item.improvementSuggestion) {
+                        <div class="rounded-md border p-3">
+                          <h3 class="text-xs font-medium uppercase text-muted-foreground">
+                            Prompt suggestion
+                          </h3>
+                          <p class="mt-2 whitespace-pre-wrap break-words text-sm leading-6">
+                            {{ item.improvementSuggestion }}
+                          </p>
+                        </div>
+                      }
+
+                      @if (item.errorMessage) {
+                        <p
+                          class="rounded-md border border-destructive/30 bg-destructive/5 p-3 text-sm text-destructive">
+                          {{ item.errorMessage }}
+                        </p>
+                      }
+                    </div>
+                  }
+                </article>
+              }
+            </div>
+          </div>
+        }
+      </z-card>
+    </section>
+  }
+
+  @if (showCreateModal()) {
+    <evl-run-create-modal (dismissed)="closeCreateModal()" />
+  }
+
+  @if (showDeleteModal()) {
+    @if (selectedRunForDelete(); as run) {
+      <evl-run-delete-modal
+        [run]="run"
+        (confirmed)="confirmDeleteRun()"
+        (dismissed)="closeDeleteModal()" />
+    }
+  }
+</div>

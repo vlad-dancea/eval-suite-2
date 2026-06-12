@@ -1,6 +1,5 @@
-package com.group34.eval_suite.dto;
+package com.group34.eval_suite.systemprompts;
 
-import com.group34.eval_suite.model.SystemPrompt;
 import java.time.OffsetDateTime;
 import java.util.UUID;
 

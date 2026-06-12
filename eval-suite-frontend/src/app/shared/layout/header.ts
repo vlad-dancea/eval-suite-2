@@ -3,7 +3,7 @@ import { RouterLink, RouterLinkActive } from '@angular/router';
 import { ZardButtonComponent } from '@/shared/button/button.component';
 import { ZardBadgeComponent } from '@/shared/badge/badge.component';
 import { NgIcon, provideIcons } from '@ng-icons/core';
-import { lucideFileText, lucideMoon, lucideSun } from '@ng-icons/lucide';
+import { lucideFileText, lucideMoon, lucidePlay, lucideSun } from '@ng-icons/lucide';
 import { ZardDarkMode } from '@/zard/services';
 
 @Component({
@@ -12,6 +12,7 @@ import { ZardDarkMode } from '@/zard/services';
   providers: [
     provideIcons({
       lucideFileText,
+      lucidePlay,
       lucideSun,
       lucideMoon,
     }),
@@ -58,14 +59,13 @@ import { ZardDarkMode } from '@/zard/services';
             </a>
 
             <a
-              routerLink="/todo"
+              routerLink="/runs"
               routerLinkActive="bg-accent text-accent-foreground"
               z-button
-              zDisabled="true"
               zType="ghost"
               zSize="lg">
+              <ng-icon name="lucidePlay" aria-hidden="true" />
               Runs
-              <z-badge zType="outline" class="h-5 px-1.5 text-[10px] font-medium"> Soon </z-badge>
             </a>
           </nav>
 

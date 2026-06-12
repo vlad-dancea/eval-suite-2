@@ -1,7 +1,5 @@
-package com.group34.eval_suite.service;
+package com.group34.eval_suite.systemprompts;
 
-import com.group34.eval_suite.model.SystemPrompt;
-import com.group34.eval_suite.repository.SystemPromptRepository;
 import java.time.OffsetDateTime;
 import java.util.List;
 import java.util.UUID;
@@ -24,8 +22,7 @@ public class SystemPromptService {
   }
 
   /**
-   * Create a new system prompt.
-   * If familyId is null, it's the first version (v1) of a new prompt.
+   * Create a new system prompt. If familyId is null, it's the first version (v1) of a new prompt.
    * If familyId is provided, it increments the version number.
    */
   @Transactional
@@ -77,9 +74,7 @@ public class SystemPromptService {
     return repository.save(prompt);
   }
 
-  /**
-   * Find a specific system prompt by ID.
-   */
+  /** Find a specific system prompt by ID. */
   public SystemPrompt getPromptById(final UUID id) {
     return repository
         .findById(id)
@@ -87,16 +82,12 @@ public class SystemPromptService {
             () -> new ResponseStatusException(HttpStatus.NOT_FOUND, "System prompt not found"));
   }
 
-  /**
-   * Get all active, latest versions of prompts.
-   */
+  /** Get all active, latest versions of prompts. */
   public List<SystemPrompt> getActivePrompts() {
     return repository.findAllActiveLatest();
   }
 
-  /**
-   * Get all versions of a prompt family.
-   */
+  /** Get all versions of a prompt family. */
   public List<SystemPrompt> getFamilyHistory(final UUID familyId) {
     final List<SystemPrompt> history = repository.findByFamilyIdOrderByVersionNumberDesc(familyId);
     if (history.isEmpty()) {
@@ -106,8 +97,8 @@ public class SystemPromptService {
   }
 
   /**
-   * Archive a system prompt by setting its deleted_at timestamp.
-   * This archives all prompts in the same family.
+   * Archive a system prompt by setting its deleted_at timestamp. This archives all prompts in the
+   * same family.
    */
   @Transactional
   public SystemPrompt archivePrompt(final UUID id) {
