@@ -1,7 +1,5 @@
-package com.group34.eval_suite.repository;
+package com.group34.eval_suite.datasets;
 
-import com.group34.eval_suite.dto.DatasetSummaryResponse;
-import com.group34.eval_suite.model.Dataset;
 import java.util.List;
 import java.util.Optional;
 import java.util.UUID;

@@ -1,9 +1,5 @@
-package com.group34.eval_suite.controller;
+package com.group34.eval_suite.systemprompts;
 
-import com.group34.eval_suite.dto.SystemPromptRequest;
-import com.group34.eval_suite.dto.SystemPromptResponse;
-import com.group34.eval_suite.model.SystemPrompt;
-import com.group34.eval_suite.service.SystemPromptService;
 import jakarta.validation.Valid;
 import java.util.List;
 import java.util.UUID;

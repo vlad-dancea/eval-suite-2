@@ -1,4 +1,4 @@
-package com.group34.eval_suite.dto;
+package com.group34.eval_suite.datasets;
 
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.Size;
