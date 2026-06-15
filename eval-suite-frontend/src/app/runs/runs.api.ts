@@ -5,6 +5,7 @@ import { Observable } from 'rxjs';
 export interface CreateRunRequest {
   systemPromptId: string;
   datasetId: string;
+  automaticImprovementEnabled?: boolean;
 }
 
 export interface Run {
@@ -12,7 +13,16 @@ export interface Run {
   systemPromptId: string;
   datasetId: string;
   createdAt: string;
+  startedAt: string | null;
+  completedAt: string | null;
   status: RunStatus;
+  outputScore: number | null;
+  systemPromptScore: number | null;
+  systemPromptFeedback: string | null;
+  systemPromptImprovementSuggestion: string | null;
+  automaticImprovementEnabled: boolean;
+  automaticImprovementAttempt: number | null;
+  failureMessage: string | null;
 }
 
 export enum RunStatus {
@@ -30,6 +40,14 @@ export type RunEvent =
   | {
       type: 'RUN_UPDATED';
       run: Run;
+    }
+  | {
+      type: 'RUN_COMPLETED';
+      runId: string;
+    }
+  | {
+      type: 'RUN_FAILED';
+      runId: string;
     };
 
 @Service()
