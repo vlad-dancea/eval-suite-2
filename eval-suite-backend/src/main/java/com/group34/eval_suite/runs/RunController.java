@@ -29,11 +29,11 @@ public class RunController {
     final Run run =
         service.createRun(
             request.systemPromptId(), request.datasetId(), request.automaticImprovementEnabled());
-    return RunResponse.fromEntity(run);
+    return service.toResponse(run);
   }
 
   @GetMapping
   public List<RunResponse> getRuns() {
-    return service.getRuns().stream().map(RunResponse::fromEntity).toList();
+    return service.getRuns();
   }
 }

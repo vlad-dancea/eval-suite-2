@@ -11,7 +11,10 @@ export interface CreateRunRequest {
 export interface Run {
   id: string;
   systemPromptId: string;
+  systemPromptName: string;
+  systemPromptVersionNumber: number | null;
   datasetId: string;
+  datasetName: string;
   createdAt: string;
   startedAt: string | null;
   completedAt: string | null;

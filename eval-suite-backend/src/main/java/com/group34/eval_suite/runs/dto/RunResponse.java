@@ -9,7 +9,10 @@ import java.util.UUID;
 public record RunResponse(
     UUID id,
     UUID systemPromptId,
+    String systemPromptName,
+    Integer systemPromptVersionNumber,
     UUID datasetId,
+    String datasetName,
     OffsetDateTime createdAt,
     OffsetDateTime startedAt,
     OffsetDateTime completedAt,
@@ -22,11 +25,18 @@ public record RunResponse(
     Integer automaticImprovementAttempt,
     String failureMessage) {
 
-  public static RunResponse fromEntity(final Run entity) {
+  public static RunResponse fromEntity(
+      final Run entity,
+      final String systemPromptName,
+      final Integer systemPromptVersionNumber,
+      final String datasetName) {
     return new RunResponse(
         entity.getId(),
         entity.getSystemPromptId(),
+        systemPromptName,
+        systemPromptVersionNumber,
         entity.getDatasetId(),
+        datasetName,
         entity.getCreatedAt(),
         entity.getStartedAt(),
         entity.getCompletedAt(),

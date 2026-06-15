@@ -1,7 +1,9 @@
-import { Run, RunEvent, RunsApi, RunStatus } from '@/runs/runs.api';
-import { httpResource } from '@angular/common/http';
+import { CreateRunRequest, Run, RunEvent, RunsApi, RunStatus } from '@/runs/runs.api';
+import { HttpErrorResponse, httpResource } from '@angular/common/http';
 import { computed, DestroyRef, inject, Service, signal } from '@angular/core';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
+import { Observable } from 'rxjs';
+import { catchError, tap } from 'rxjs/operators';
 
 @Service()
 export class RunsStore {
@@ -64,6 +66,8 @@ export class RunsStore {
 
   readonly lastEvent = signal<RunEvent | null>(null);
   readonly hasReceivedLiveEvent = signal(false);
+  readonly isCreating = signal(false);
+  readonly createError = signal<string | null>(null);
 
   constructor() {
     this.connectToRunEvents();
@@ -71,6 +75,31 @@ export class RunsStore {
 
   reloadRuns(): void {
     this.runsResource.reload();
+  }
+
+  clearCreateError(): void {
+    this.createError.set(null);
+  }
+
+  createRun(request: CreateRunRequest): Observable<Run> {
+    this.isCreating.set(true);
+    this.createError.set(null);
+
+    return this.api.createRun(request).pipe(
+      tap((run) => {
+        this.isCreating.set(false);
+        this.patchedRunsById.update((current) => ({
+          ...current,
+          [run.id]: run,
+        }));
+        this.reloadRuns();
+      }),
+      catchError((error) => {
+        this.createError.set(this.createRunErrorMessage(error));
+        this.isCreating.set(false);
+        throw error;
+      }),
+    );
   }
 
   private connectToRunEvents(): void {
@@ -90,6 +119,13 @@ export class RunsStore {
     switch (event.type) {
       case 'RUN_CREATED':
         this.reloadRuns();
+        break;
+
+      case 'RUN_UPDATED':
+        this.patchedRunsById.update((current) => ({
+          ...current,
+          [event.run.id]: event.run,
+        }));
         break;
 
       case 'RUN_COMPLETED':
@@ -117,5 +153,27 @@ export class RunsStore {
         status,
       },
     }));
+  }
+
+  private createRunErrorMessage(error: unknown): string {
+    if (error instanceof HttpErrorResponse) {
+      if (error.status === 0) {
+        return 'Could not connect to the backend server. Please make sure it is running and try again.';
+      }
+
+      if (typeof error.error?.message === 'string') {
+        return error.error.message;
+      }
+
+      if (error.status >= 500) {
+        return 'The backend server could not create the run. Please try again in a moment.';
+      }
+
+      if (error.status >= 400) {
+        return 'The run could not be started. Please check the selected prompt and dataset.';
+      }
+    }
+
+    return 'Failed to create run. Please try again.';
   }
 }
