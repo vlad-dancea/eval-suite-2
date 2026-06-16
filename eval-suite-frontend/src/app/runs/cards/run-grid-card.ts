@@ -40,9 +40,7 @@ import { type Run, RunStatus } from '../runs.api';
 
           <div class="flex min-w-0 items-center gap-2 text-muted-foreground">
             <span class="h-px w-6 shrink-0 bg-border"></span>
-            <p
-              class="truncate text-sm leading-5"
-              [title]="run().datasetName">
+            <p class="truncate text-sm leading-5" [title]="run().datasetName">
               {{ run().datasetName }}
             </p>
           </div>
