@@ -160,8 +160,7 @@ public class RunExecutionService {
                 .judgeFeedback(grade.feedback())
                 .build());
         evaluated.add(
-            new EvaluatedItem(
-                item.getInput(), item.getExpectedOutput(), output, grade.score()));
+            new EvaluatedItem(item.getInput(), item.getExpectedOutput(), output, grade.score()));
       }
 
       final Integer outputScore = aggregateScore(results);
@@ -208,7 +207,9 @@ public class RunExecutionService {
 
   private Integer aggregateScore(final List<RunDatasetItemResult> results) {
     final List<Integer> scores =
-        results.stream().map(RunDatasetItemResult::getOutputScore).filter(score -> score != null)
+        results.stream()
+            .map(RunDatasetItemResult::getOutputScore)
+            .filter(score -> score != null)
             .toList();
     if (scores.isEmpty()) {
       return null;

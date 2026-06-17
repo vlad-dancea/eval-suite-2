@@ -1,0 +1,61 @@
+# Full application stack — Postgres, Spring Boot backend, Angular frontend.
+# Single-command run for anyone without mise installed:
+#
+#     docker compose up --build
+#
+# Requires only Docker + the Compose plugin. API credentials are read from
+# eval-suite-backend/.env (see README step 1).
+services:
+  app-postgres:
+    image: postgres:17-alpine
+    container_name: eval-suite-app-postgres
+    environment:
+      POSTGRES_DB: eval_suite
+      POSTGRES_USER: eval_suite
+      POSTGRES_PASSWORD: eval_suite
+    ports:
+      - "5433:5432"
+    volumes:
+      - app-postgres-data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U eval_suite -d eval_suite"]
+      interval: 5s
+      timeout: 5s
+      retries: 12
+
+  backend:
+    build:
+      context: ./eval-suite-backend
+    container_name: eval-suite-backend
+    depends_on:
+      app-postgres:
+        condition: service_healthy
+    env_file:
+      - ./eval-suite-backend/.env
+    environment:
+      SPRING_DATASOURCE_URL: jdbc:postgresql://app-postgres:5432/eval_suite
+      SPRING_DATASOURCE_USERNAME: eval_suite
+      SPRING_DATASOURCE_PASSWORD: eval_suite
+      SPRING_JPA_OPEN_IN_VIEW: "false"
+      MANAGEMENT_HEALTH_REDIS_ENABLED: "false"
+    ports:
+      - "8080:8080"
+    healthcheck:
+      test: ["CMD-SHELL", "bash -c 'exec 3<>/dev/tcp/localhost/8080' 2>/dev/null"]
+      interval: 10s
+      timeout: 5s
+      retries: 12
+      start_period: 60s
+
+  frontend:
+    build:
+      context: ./eval-suite-frontend
+    container_name: eval-suite-frontend
+    depends_on:
+      - backend
+    ports:
+      - "4000:4000"
+
+volumes:
+  app-postgres-data:
+    name: eval-suite-app-postgres-data

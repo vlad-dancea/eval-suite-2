@@ -13,10 +13,10 @@ public class RunPromptFactory {
 
   private static final String OUTPUT_GRADING_INSTRUCTION =
       "You are a strict evaluation judge. Compare the assistant's actual output to the expected"
-          + " output for the given input. Respond with ONLY a JSON object of the form"
-          + " {\"score\": <integer 0-100>, \"feedback\": <string>}. score is how well the actual"
-          + " output matches the expected output (100 = perfect, 0 = completely wrong). feedback is"
-          + " a brief explanation of at most 2 sentences. Do not include any text outside the JSON.";
+          + " output for the given input. Respond with ONLY a JSON object of the form {\"score\":"
+          + " <integer 0-100>, \"feedback\": <string>}. score is how well the actual output matches"
+          + " the expected output (100 = perfect, 0 = completely wrong). feedback is a brief"
+          + " explanation of at most 2 sentences. Do not include any text outside the JSON.";
 
   private static final String PROMPT_GRADING_INSTRUCTION =
       "You are a strict evaluation judge assessing the quality of a system prompt based on how the"

@@ -90,7 +90,9 @@ import { RunsStore } from '../runs.store';
               <div class="space-y-6">
                 <div class="space-y-2">
                   <div class="flex flex-wrap items-center gap-2">
-                    <z-badge [zType]="statusBadgeType(detail.run.status)" class="h-5 px-1.5 text-xs">
+                    <z-badge
+                      [zType]="statusBadgeType(detail.run.status)"
+                      class="h-5 px-1.5 text-xs">
                       {{ statusLabel(detail.run.status) }}
                     </z-badge>
                     @if (detail.run.systemPromptScore !== null) {
@@ -137,7 +139,8 @@ import { RunsStore } from '../runs.store';
                             Item {{ (item.position ?? 0) + 1 }}
                           </span>
                           @if (item.outputScore !== null) {
-                            <span class="rounded-md border bg-muted/40 px-2 py-0.5 text-xs font-medium">
+                            <span
+                              class="rounded-md border bg-muted/40 px-2 py-0.5 text-xs font-medium">
                               {{ item.outputScore }}/100
                             </span>
                           }
@@ -146,13 +149,15 @@ import { RunsStore } from '../runs.store';
                         <div class="grid gap-3 sm:grid-cols-2">
                           <div>
                             <p class="text-xs font-medium text-foreground">Input</p>
-                            <p class="mt-1 whitespace-pre-wrap break-words font-mono text-xs text-muted-foreground">
+                            <p
+                              class="mt-1 whitespace-pre-wrap break-words font-mono text-xs text-muted-foreground">
                               {{ item.input }}
                             </p>
                           </div>
                           <div>
                             <p class="text-xs font-medium text-foreground">Expected output</p>
-                            <p class="mt-1 whitespace-pre-wrap break-words font-mono text-xs text-muted-foreground">
+                            <p
+                              class="mt-1 whitespace-pre-wrap break-words font-mono text-xs text-muted-foreground">
                               {{ item.expectedOutput }}
                             </p>
                           </div>
@@ -160,7 +165,8 @@ import { RunsStore } from '../runs.store';
 
                         <div>
                           <p class="text-xs font-medium text-foreground">Actual output</p>
-                          <p class="mt-1 whitespace-pre-wrap break-words font-mono text-xs text-muted-foreground">
+                          <p
+                            class="mt-1 whitespace-pre-wrap break-words font-mono text-xs text-muted-foreground">
                             {{ item.modelOutput }}
                           </p>
                         </div>
@@ -208,7 +214,9 @@ export class RunDetailModal {
     }
   }
 
-  protected statusBadgeType(status: RunStatus): 'secondary' | 'outline' | 'default' | 'destructive' {
+  protected statusBadgeType(
+    status: RunStatus,
+  ): 'secondary' | 'outline' | 'default' | 'destructive' {
     switch (status) {
       case RunStatus.QUEUED:
         return 'secondary';

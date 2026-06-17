@@ -97,8 +97,7 @@ class RunExecutionServiceTest {
 
     final ArgumentCaptor<Integer> outputScore = ArgumentCaptor.forClass(Integer.class);
     @SuppressWarnings("unchecked")
-    final ArgumentCaptor<List<RunDatasetItemResult>> items =
-        ArgumentCaptor.forClass(List.class);
+    final ArgumentCaptor<List<RunDatasetItemResult>> items = ArgumentCaptor.forClass(List.class);
     final ArgumentCaptor<Integer> promptScore = ArgumentCaptor.forClass(Integer.class);
 
     verify(runService)

@@ -76,7 +76,5 @@
 }
 
 @if (shouldShowDetailModal()) {
-  <evl-run-detail-modal
-    [familyName]="selectedFamilyName()"
-    (dismissed)="closeRunDetail()" />
+  <evl-run-detail-modal [familyName]="selectedFamilyName()" (dismissed)="closeRunDetail()" />
 }
