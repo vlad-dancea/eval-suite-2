@@ -40,7 +40,8 @@ public class RunExecutionService {
   private static final Logger LOGGER = LoggerFactory.getLogger(RunExecutionService.class);
 
   private static final double TEMPERATURE = 0.0;
-  private static final int MAX_TOKENS = 2048;
+  private static final int MAX_TOKENS = 4096;
+  private static final String FINISH_REASON_LENGTH = "length";
   private static final int MAX_PROMPT_CHARS = 5000;
   private static final int MAX_IMPROVEMENT_ATTEMPTS = 10;
 
@@ -193,9 +194,14 @@ public class RunExecutionService {
     if (response.choices().isEmpty()) {
       throw new RunExecutionException("LLM returned no choices");
     }
-    final String content = response.choices().getFirst().message().content();
+    final var choice = response.choices().getFirst();
+    final String content = choice.message().content();
     if (content == null || content.isBlank()) {
       throw new RunExecutionException("LLM returned empty content");
+    }
+    if (FINISH_REASON_LENGTH.equals(choice.finishReason())) {
+      throw new RunExecutionException(
+          "LLM response was truncated at the " + MAX_TOKENS + "-token limit: " + content);
     }
     return content;
   }
