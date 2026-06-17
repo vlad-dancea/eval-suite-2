@@ -1,0 +1,82 @@
+<div class="space-y-6">
+  <!-- Page Header -->
+  <section class="flex justify-between items-center">
+    <div>
+      <h1 class="text-2xl font-semibold tracking-tight text-foreground sm:text-3xl">Runs</h1>
+
+      <p class="max-w-2xl text-sm leading-5 text-muted-foreground mt-2">
+        Run evaluations of system prompts against datasets and compare performance over time.<br />
+        Dashboard will automatically update whenever a run is completed.
+      </p>
+    </div>
+
+    <button type="button" z-button zType="outline" zSize="lg" (click)="openCreateRunModal()">
+      <ng-icon name="lucidePlus" />
+      New Run
+    </button>
+  </section>
+
+  <z-divider />
+</div>
+
+@if (isLoading()) {
+  <section class="grid grid-cols-3 gap-4">
+    <evl-skeleton-card />
+    <evl-skeleton-card />
+    <evl-skeleton-card />
+  </section>
+} @else if (error()) {
+  <z-card class="mx-auto max-w-2xl border-destructive/30 bg-destructive/5 text-center">
+    <div
+      class="mx-auto flex h-10 w-10 items-center justify-center rounded-full bg-destructive/10 text-destructive">
+      <ng-icon name="lucideTriangleAlert" class="h-5 w-5" aria-hidden="true" />
+    </div>
+
+    <h2 class="mt-4 text-lg font-semibold text-foreground">Error loading runs</h2>
+
+    <p class="mt-2 text-sm leading-5 text-muted-foreground">
+      Could not connect to the backend server. <br />
+      Please make sure the backend application is running.
+    </p>
+
+    <button z-button zType="outline" type="button" (click)="reloadRuns()" class="mt-4">
+      <ng-icon name="lucideRefreshCw" aria-hidden="true" />
+      Retry
+    </button>
+  </z-card>
+} @else if (familyCards().length === 0) {
+  <z-card class="mx-auto max-w-xl text-center">
+    <div
+      class="mx-auto flex h-10 w-10 items-center justify-center rounded-full bg-muted text-muted-foreground">
+      <ng-icon name="lucideCircleQuestionMark" class="h-5 w-5" aria-hidden="true" />
+    </div>
+
+    <h2 class="mt-4 text-lg font-semibold text-foreground">No runs yet</h2>
+
+    <p class="mt-2 text-sm leading-6 text-muted-foreground">
+      Get started by creating your first evaluation run.
+    </p>
+
+    <button z-button type="button" (click)="openCreateRunModal()" class="mt-6 gap-2">
+      <ng-icon name="lucidePlus" aria-hidden="true" />
+      Create Run
+    </button>
+  </z-card>
+} @else {
+  <!-- Runs Grid: one card per prompt family (most recent run on the active version) -->
+  <section class="grid grid-cols-3 gap-4">
+    @for (run of familyCards(); track run.id) {
+      <evl-run-grid-card [run]="run" (cardClick)="openRunDetail(run)" />
+    }
+  </section>
+}
+
+@if (shouldShowCreateRunModal()) {
+  <evl-create-run-modal (dismissed)="closeCreateRunModal()" />
+}
+
+@if (shouldShowDetailModal()) {
+  <evl-run-detail-modal
+    [familyName]="selectedFamilyName()"
+    (dismissed)="closeRunDetail()" />
+}

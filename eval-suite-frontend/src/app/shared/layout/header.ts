@@ -58,14 +58,12 @@ import { ZardDarkMode } from '@/zard/services';
             </a>
 
             <a
-              routerLink="/todo"
+              routerLink="/runs"
               routerLinkActive="bg-accent text-accent-foreground"
               z-button
-              zDisabled="true"
               zType="ghost"
               zSize="lg">
               Runs
-              <z-badge zType="outline" class="h-5 px-1.5 text-[10px] font-medium"> Soon </z-badge>
             </a>
           </nav>
 

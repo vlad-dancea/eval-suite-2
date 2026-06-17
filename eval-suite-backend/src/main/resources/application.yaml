@@ -1,30 +1,40 @@
 spring:
-    datasource:
-        url: jdbc:postgresql://localhost:5433/eval_suite
-        username: eval_suite
-        password: eval_suite
-        driver-class-name: org.postgresql.Driver
+  datasource:
+    url: jdbc:postgresql://localhost:5433/eval_suite
+    username: eval_suite
+    password: eval_suite
+    driver-class-name: org.postgresql.Driver
 
-    jpa:
-        hibernate:
-            ddl-auto: update
-        open-in-view: false
+  jpa:
+    hibernate:
+      ddl-auto: update
+    open-in-view: false
 
-    sql:
-        init:
-            mode: always
+  sql:
+    init:
+      mode: always
 
-    ai:
-        model:
-            chat: none
-            embedding: none
-            image: none
-            moderation: none
-            audio:
-                speech: none
-                transcription: none
+  ai:
+    model:
+      chat: none
+      embedding: none
+      image: none
+      moderation: none
+      audio:
+        speech: none
+        transcription: none
+
+server:
+  error:
+    include-message: always
+
+eval-suite:
+  open-ai:
+    base-url: ${AQUEDUCT_OPENAI_BASE_URL:https://aqueduct.ai.datalab.tuwien.ac.at/}
+    api-key: ${AQUEDUCT_API_KEY:}
+    model-name: ${AQUEDUCT_MODEL_NAME:}
 
 management:
-    health:
-        redis:
-            enabled: false
+  health:
+    redis:
+      enabled: false

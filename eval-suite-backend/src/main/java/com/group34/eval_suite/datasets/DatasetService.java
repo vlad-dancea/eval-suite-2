@@ -3,12 +3,14 @@ package com.group34.eval_suite.datasets;
 import java.time.OffsetDateTime;
 import java.util.List;
 import java.util.UUID;
+import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.server.ResponseStatusException;
 
 @Service
+@RequiredArgsConstructor
 @SuppressWarnings({"PMD.ShortVariable", "PMD.CyclomaticComplexity", "PMD.LongVariable"})
 public class DatasetService {
 
@@ -17,10 +19,6 @@ public class DatasetService {
   private static final int MAX_ITEMS = 500;
 
   private final DatasetRepository repository;
-
-  public DatasetService(DatasetRepository repository) {
-    this.repository = repository;
-  }
 
   /**
    * Create a new immutable dataset together with its input/expected-output pairs.

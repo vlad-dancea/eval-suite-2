@@ -3,12 +3,14 @@ package com.group34.eval_suite.systemprompts;
 import java.time.OffsetDateTime;
 import java.util.List;
 import java.util.UUID;
+import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.server.ResponseStatusException;
 
 @Service
+@RequiredArgsConstructor
 @SuppressWarnings({"PMD.ShortVariable", "PMD.CyclomaticComplexity", "PMD.LongVariable"})
 public class SystemPromptService {
 
@@ -16,10 +18,6 @@ public class SystemPromptService {
   private static final int MAX_NAME_LENGTH = 120;
 
   private final SystemPromptRepository repository;
-
-  public SystemPromptService(SystemPromptRepository repository) {
-    this.repository = repository;
-  }
 
   /**
    * Create a new system prompt.
@@ -101,6 +99,22 @@ public class SystemPromptService {
       throw new ResponseStatusException(HttpStatus.NOT_FOUND, "Prompt family not found");
     }
     return history;
+  }
+
+  /**
+   * Discard a single prompt version by setting its deleted_at timestamp.
+   * Unlike {@link #archivePrompt(UUID)} this only affects the one version, so the previous
+   * version becomes the active latest again. Used to drop an auto-improvement attempt that did
+   * not improve on the previous version.
+   */
+  @Transactional
+  public SystemPrompt discardVersion(final UUID id) {
+    final SystemPrompt prompt = getPromptById(id);
+    if (prompt.getDeletedAt() == null) {
+      prompt.setDeletedAt(OffsetDateTime.now());
+      repository.save(prompt);
+    }
+    return prompt;
   }
 
   /**
