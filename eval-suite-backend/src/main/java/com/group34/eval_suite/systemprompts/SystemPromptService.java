@@ -102,6 +102,22 @@ public class SystemPromptService {
   }
 
   /**
+   * Discard a single prompt version by setting its deleted_at timestamp.
+   * Unlike {@link #archivePrompt(UUID)} this only affects the one version, so the previous
+   * version becomes the active latest again. Used to drop an auto-improvement attempt that did
+   * not improve on the previous version.
+   */
+  @Transactional
+  public SystemPrompt discardVersion(final UUID id) {
+    final SystemPrompt prompt = getPromptById(id);
+    if (prompt.getDeletedAt() == null) {
+      prompt.setDeletedAt(OffsetDateTime.now());
+      repository.save(prompt);
+    }
+    return prompt;
+  }
+
+  /**
    * Archive a system prompt by setting its deleted_at timestamp.
    * This archives all prompts in the same family.
    */

@@ -1,5 +1,5 @@
 import { DatePipe } from '@angular/common';
-import { Component, computed, input } from '@angular/core';
+import { Component, computed, input, output } from '@angular/core';
 
 import { ZardBadgeComponent } from '@/shared/badge';
 import { ZardCardComponent } from '@/shared/card';
@@ -10,12 +10,22 @@ import { type Run, RunStatus } from '../runs.api';
   selector: 'evl-run-grid-card',
   imports: [DatePipe, ZardBadgeComponent, ZardCardComponent],
   template: `
-    <z-card class="group min-h-36 justify-between">
+    <z-card
+      class="group min-h-36 cursor-pointer justify-between transition-colors hover:border-primary/40"
+      (click)="cardClick.emit()">
       <div class="space-y-5">
         <div class="flex items-start justify-between gap-3">
-          <z-badge [zType]="statusBadgeType()" class="h-5 px-1.5 text-xs font-medium">
-            {{ statusLabel() }}
-          </z-badge>
+          <div class="flex items-center gap-2">
+            <z-badge [zType]="statusBadgeType()" class="h-5 px-1.5 text-xs font-medium">
+              {{ statusLabel() }}
+            </z-badge>
+
+            @if (run().automaticImprovementEnabled) {
+              <z-badge zType="outline" class="h-5 px-1.5 text-[10px] font-medium">
+                Auto-improve
+              </z-badge>
+            }
+          </div>
 
           <time class="shrink-0 text-xs text-muted-foreground">
             {{ run().createdAt | date: 'short' }}
@@ -44,13 +54,43 @@ import { type Run, RunStatus } from '../runs.api';
               {{ run().datasetName }}
             </p>
           </div>
+
+          @if (hasScores()) {
+            <div class="flex flex-wrap items-center gap-2 pt-1">
+              @if (run().systemPromptScore !== null) {
+                <span
+                  class="rounded-md border bg-muted/40 px-2 py-0.5 text-xs font-medium text-foreground">
+                  Prompt {{ run().systemPromptScore }}/100
+                </span>
+              }
+              @if (run().outputScore !== null) {
+                <span
+                  class="rounded-md border bg-muted/40 px-2 py-0.5 text-xs font-medium text-muted-foreground">
+                  Output {{ run().outputScore }}/100
+                </span>
+              }
+            </div>
+          }
+
+          @if (run().status === RunStatus.FAILED && run().failureMessage) {
+            <p class="truncate text-xs text-destructive" [title]="run().failureMessage">
+              {{ run().failureMessage }}
+            </p>
+          }
         </div>
       </div>
     </z-card>
   `,
 })
 export class RunGridCard {
+  protected readonly RunStatus = RunStatus;
+
   readonly run = input.required<Run>();
+  readonly cardClick = output<void>();
+
+  protected readonly hasScores = computed(
+    () => this.run().systemPromptScore !== null || this.run().outputScore !== null,
+  );
 
   protected readonly statusLabel = computed(() => {
     switch (this.run().status) {

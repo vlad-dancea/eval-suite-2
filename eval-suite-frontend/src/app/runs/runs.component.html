@@ -44,7 +44,7 @@
       Retry
     </button>
   </z-card>
-} @else if (runs().length === 0) {
+} @else if (familyCards().length === 0) {
   <z-card class="mx-auto max-w-xl text-center">
     <div
       class="mx-auto flex h-10 w-10 items-center justify-center rounded-full bg-muted text-muted-foreground">
@@ -63,14 +63,20 @@
     </button>
   </z-card>
 } @else {
-  <!-- Runs Grid -->
+  <!-- Runs Grid: one card per prompt family (most recent run on the active version) -->
   <section class="grid grid-cols-3 gap-4">
-    @for (run of runs(); track run.id) {
-      <evl-run-grid-card [run]="run" />
+    @for (run of familyCards(); track run.id) {
+      <evl-run-grid-card [run]="run" (cardClick)="openRunDetail(run)" />
     }
   </section>
 }
 
 @if (shouldShowCreateRunModal()) {
   <evl-create-run-modal (dismissed)="closeCreateRunModal()" />
+}
+
+@if (shouldShowDetailModal()) {
+  <evl-run-detail-modal
+    [familyName]="selectedFamilyName()"
+    (dismissed)="closeRunDetail()" />
 }

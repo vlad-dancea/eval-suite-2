@@ -11,13 +11,16 @@ export interface CreateRunRequest {
 export interface Run {
   id: string;
   systemPromptId: string;
+  systemPromptFamilyId: string | null;
   systemPromptName: string;
   systemPromptVersionNumber: number | null;
+  promptVersionActive: boolean;
   datasetId: string;
   datasetName: string;
   createdAt: string;
   startedAt: string | null;
   completedAt: string | null;
+  updatedAt: string | null;
   status: RunStatus;
   outputScore: number | null;
   systemPromptScore: number | null;
@@ -26,6 +29,21 @@ export interface Run {
   automaticImprovementEnabled: boolean;
   automaticImprovementAttempt: number | null;
   failureMessage: string | null;
+}
+
+export interface RunItemResult {
+  datasetItemId: string;
+  position: number | null;
+  input: string | null;
+  expectedOutput: string | null;
+  modelOutput: string | null;
+  outputScore: number | null;
+  judgeFeedback: string | null;
+}
+
+export interface RunDetail {
+  run: Run;
+  items: RunItemResult[];
 }
 
 export enum RunStatus {
@@ -45,12 +63,8 @@ export type RunEvent =
       run: Run;
     }
   | {
-      type: 'RUN_COMPLETED';
-      runId: string;
-    }
-  | {
       type: 'RUN_FAILED';
-      runId: string;
+      run: Run;
     };
 
 @Service()
@@ -61,9 +75,7 @@ export class RunsApi {
 
   connect(): Observable<RunEvent> {
     return new Observable<RunEvent>((subscriber) => {
-      const source = new EventSource(this.eventsUrl, {
-        withCredentials: true,
-      });
+      const source = new EventSource(this.eventsUrl);
 
       const onMessage = (message: MessageEvent<string>) => {
         try {
@@ -74,13 +86,13 @@ export class RunsApi {
       };
 
       source.addEventListener('RUN_CREATED', onMessage);
-      source.addEventListener('RUN_COMPLETED', onMessage);
+      source.addEventListener('RUN_UPDATED', onMessage);
       source.addEventListener('RUN_FAILED', onMessage);
       source.addEventListener('error', () => {});
 
       return () => {
         source.removeEventListener('RUN_CREATED', onMessage);
-        source.removeEventListener('RUN_COMPLETED', onMessage);
+        source.removeEventListener('RUN_UPDATED', onMessage);
         source.removeEventListener('RUN_FAILED', onMessage);
         source.close();
       };

@@ -12,7 +12,9 @@ import { RunsStore } from './runs.store';
 import { SkeletonCardComponent } from '@/system-prompts/skeleton-card';
 import { ZardCardComponent } from '@/shared/card';
 import { CreateRunModal } from './modals/create-run-modal';
+import { RunDetailModal } from './modals/run-detail-modal';
 import { RunGridCard } from './cards/run-grid-card';
+import { type Run } from './runs.api';
 
 @Component({
   selector: 'evl-runs',
@@ -23,6 +25,7 @@ import { RunGridCard } from './cards/run-grid-card';
     SkeletonCardComponent,
     ZardCardComponent,
     CreateRunModal,
+    RunDetailModal,
     RunGridCard,
   ],
   providers: [
@@ -33,7 +36,7 @@ import { RunGridCard } from './cards/run-grid-card';
 export class RunsComponent {
   private readonly store = inject(RunsStore);
 
-  protected runs = this.store.runs;
+  protected familyCards = this.store.familyCards;
   protected isLoading = this.store.isLoadingRuns;
   protected error = this.store.runsError;
 
@@ -42,6 +45,8 @@ export class RunsComponent {
   }
 
   protected shouldShowCreateRunModal = signal(false);
+  protected selectedFamilyName = signal('');
+  protected shouldShowDetailModal = signal(false);
 
   protected openCreateRunModal() {
     this.shouldShowCreateRunModal.set(true);
@@ -49,5 +54,17 @@ export class RunsComponent {
 
   protected closeCreateRunModal() {
     this.shouldShowCreateRunModal.set(false);
+  }
+
+  protected openRunDetail(run: Run) {
+    this.selectedFamilyName.set(run.systemPromptName);
+    this.store.selectFamily(run.systemPromptFamilyId ?? run.id);
+    this.store.selectRun(run.id);
+    this.shouldShowDetailModal.set(true);
+  }
+
+  protected closeRunDetail() {
+    this.shouldShowDetailModal.set(false);
+    this.store.selectFamily(null);
   }
 }

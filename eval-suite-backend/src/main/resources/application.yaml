@@ -24,6 +24,10 @@ spring:
         speech: none
         transcription: none
 
+server:
+  error:
+    include-message: always
+
 eval-suite:
   open-ai:
     base-url: ${AQUEDUCT_OPENAI_BASE_URL:https://aqueduct.ai.datalab.tuwien.ac.at/}

@@ -198,7 +198,7 @@ import { RunsStore } from '../runs.store';
                   </span>
                   <span class="block text-sm leading-5 text-muted-foreground">
                     The judge will continuously run and improve the initial prompt until it
-                    stablizes.
+                    stabilizes.
                   </span>
                 </span>
               </label>

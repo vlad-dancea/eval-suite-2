@@ -35,6 +35,7 @@ public interface SystemPromptRepository extends JpaRepository<SystemPrompt, UUID
               SELECT MAX(sub.versionNumber)
               FROM SystemPrompt sub
               WHERE sub.familyId = sp.familyId
+              AND sub.deletedAt IS NULL
           )
           ORDER BY sp.createdAt DESC
       """)

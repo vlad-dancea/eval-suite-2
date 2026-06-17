@@ -13,6 +13,8 @@ public class RunEventService {
 
   private static final long TIMEOUT_MILLIS = 30L * 60L * 1000L;
   private static final String RUN_CREATED = "RUN_CREATED";
+  private static final String RUN_UPDATED = "RUN_UPDATED";
+  private static final String RUN_FAILED = "RUN_FAILED";
 
   private final List<SseEmitter> emitters = new CopyOnWriteArrayList<>();
 
@@ -35,6 +37,14 @@ public class RunEventService {
 
   public void publishRunCreated(final RunResponse run) {
     publish(RUN_CREATED, RunEventResponse.created(run));
+  }
+
+  public void publishRunUpdated(final RunResponse run) {
+    publish(RUN_UPDATED, RunEventResponse.updated(run));
+  }
+
+  public void publishRunFailed(final RunResponse run) {
+    publish(RUN_FAILED, RunEventResponse.failed(run));
   }
 
   private void publish(final String eventName, final RunEventResponse event) {

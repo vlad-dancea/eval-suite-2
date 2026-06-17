@@ -33,8 +33,16 @@ run = "bun run start"
 [tasks."dev:backend"]
 description = "Start the Spring Boot backend dev server against the local Postgres database."
 dir = "eval-suite-backend"
-env = { SPRING_DATASOURCE_URL = "jdbc:postgresql://localhost:5433/eval_suite", SPRING_DATASOURCE_USERNAME = "eval_suite", SPRING_DATASOURCE_PASSWORD = "eval_suite", SPRING_JPA_HIBERNATE_DDL_AUTO = "validate", SPRING_JPA_OPEN_IN_VIEW = "false", MANAGEMENT_HEALTH_REDIS_ENABLED = "false" }
 run = "./mvnw spring-boot:run"
+
+[tasks."dev:backend".env]
+_.file = "eval-suite-backend/.env"
+SPRING_DATASOURCE_URL = "jdbc:postgresql://localhost:5433/eval_suite"
+SPRING_DATASOURCE_USERNAME = "eval_suite"
+SPRING_DATASOURCE_PASSWORD = "eval_suite"
+SPRING_JPA_HIBERNATE_DDL_AUTO = "validate"
+SPRING_JPA_OPEN_IN_VIEW = "false"
+MANAGEMENT_HEALTH_REDIS_ENABLED = "false"
 
 [tasks."db:nuke"]
 description = "Recreate the local application database container and volume."

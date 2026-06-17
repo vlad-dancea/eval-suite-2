@@ -57,6 +57,9 @@ public class Run {
   @Column(name = "completed_at")
   private OffsetDateTime completedAt;
 
+  @Column(name = "updated_at")
+  private OffsetDateTime updatedAt;
+
   @Column(name = "deleted_at")
   private OffsetDateTime deletedAt;
 

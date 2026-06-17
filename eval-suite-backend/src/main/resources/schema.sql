@@ -36,6 +36,7 @@ CREATE TABLE IF NOT EXISTS runs (
     created_at TIMESTAMPTZ NOT NULL DEFAULT now(),
     started_at TIMESTAMPTZ NULL,
     completed_at TIMESTAMPTZ NULL,
+    updated_at TIMESTAMPTZ NULL,
     deleted_at TIMESTAMPTZ NULL,
     status VARCHAR(20) NOT NULL,
     system_prompt_id UUID NOT NULL REFERENCES system_prompts(id),

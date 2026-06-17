@@ -1,9 +1,29 @@
-import { CreateRunRequest, Run, RunEvent, RunsApi, RunStatus } from '@/runs/runs.api';
+import { CreateRunRequest, Run, RunDetail, RunEvent, RunsApi, RunStatus } from '@/runs/runs.api';
 import { HttpErrorResponse, httpResource } from '@angular/common/http';
-import { computed, DestroyRef, inject, Service, signal } from '@angular/core';
+import { computed, DestroyRef, effect, inject, Service, signal } from '@angular/core';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { Observable } from 'rxjs';
 import { catchError, tap } from 'rxjs/operators';
+
+function recencyKey(run: Run): string {
+  return run.updatedAt ?? run.createdAt;
+}
+
+function byCreatedDesc(a: Run, b: Run): number {
+  return b.createdAt.localeCompare(a.createdAt);
+}
+
+/**
+ * Representative run for a family card: prefer a run whose prompt version is still active, then the
+ * most recently created one. This keeps "most recent run" and "keep the best version" consistent —
+ * discarded auto-improvement attempts are inactive and never shadow the kept best version.
+ */
+function isBetterRepresentative(candidate: Run, current: Run): boolean {
+  if (candidate.promptVersionActive !== current.promptVersionActive) {
+    return candidate.promptVersionActive;
+  }
+  return candidate.createdAt.localeCompare(current.createdAt) > 0;
+}
 
 @Service()
 export class RunsStore {
@@ -19,42 +39,31 @@ export class RunsStore {
     },
   );
 
-  private readonly patchedRunsById = signal<Record<string, Run>>({});
+  // Single source of truth, seeded by the server snapshot and updated live by SSE. Entries are
+  // keyed by run id and the newer `updatedAt` always wins, so a reload can never resurrect a stale
+  // state and a live update is never permanently shadowed by an older snapshot.
+  private readonly runsById = signal<Record<string, Run>>({});
 
-  readonly runs = computed(() => {
-    const merged = new Map<string, Run>();
-
-    for (const run of this.runsResource.value()) {
-      merged.set(run.id, run);
-    }
-
-    for (const run of Object.values(this.patchedRunsById())) {
-      merged.set(run.id, run);
-    }
-
-    return Array.from(merged.values()).sort((a, b) => b.createdAt.localeCompare(a.createdAt));
-  });
+  readonly runs = computed(() => Object.values(this.runsById()).sort(byCreatedDesc));
 
   readonly isLoadingRuns = computed(() => this.runsResource.isLoading());
   readonly runsError = computed(() => this.runsResource.error());
 
-  readonly queuedRuns = computed(() =>
-    this.runs().filter((run) => run.status === RunStatus.QUEUED),
-  );
-
-  readonly runningRuns = computed(() =>
-    this.runs().filter((run) => run.status === RunStatus.RUNNING),
-  );
-
-  readonly finishedRuns = computed(() =>
-    this.runs().filter(
-      (run) => run.status === RunStatus.SUCCEEDED || run.status === RunStatus.FAILED,
-    ),
-  );
+  // Dashboard shows one card per prompt family (most recent run on the active version).
+  readonly familyCards = computed(() => {
+    const byFamily = new Map<string, Run>();
+    for (const run of this.runs()) {
+      const key = run.systemPromptFamilyId ?? run.id;
+      const current = byFamily.get(key);
+      if (!current || isBetterRepresentative(run, current)) {
+        byFamily.set(key, run);
+      }
+    }
+    return Array.from(byFamily.values()).sort(byCreatedDesc);
+  });
 
   readonly stats = computed(() => {
     const runs = this.runs();
-
     return {
       total: runs.length,
       queued: runs.filter((run) => run.status === RunStatus.QUEUED).length,
@@ -64,17 +73,57 @@ export class RunsStore {
     };
   });
 
-  readonly lastEvent = signal<RunEvent | null>(null);
-  readonly hasReceivedLiveEvent = signal(false);
   readonly isCreating = signal(false);
   readonly createError = signal<string | null>(null);
 
+  // Run/family detail (timeline + drill-in).
+  readonly selectedFamilyId = signal<string | null>(null);
+  readonly selectedRunId = signal<string | null>(null);
+
+  private readonly detailResource = httpResource<RunDetail | undefined>(
+    () => {
+      const id = this.selectedRunId();
+      if (!id) {
+        return undefined;
+      }
+      return { url: this.api.runById(id) };
+    },
+    {
+      defaultValue: undefined,
+    },
+  );
+
+  readonly selectedRunDetail = computed(() => this.detailResource.value());
+  readonly isLoadingDetail = computed(() => this.detailResource.isLoading());
+  readonly detailError = computed(() => this.detailResource.error());
+
+  readonly familyRuns = computed(() => {
+    const familyId = this.selectedFamilyId();
+    if (!familyId) {
+      return [];
+    }
+    return this.runs().filter((run) => run.systemPromptFamilyId === familyId);
+  });
+
   constructor() {
+    // Merge each server snapshot into the live map.
+    effect(() => {
+      this.mergeRuns(this.runsResource.value());
+    });
     this.connectToRunEvents();
   }
 
   reloadRuns(): void {
     this.runsResource.reload();
+  }
+
+  selectFamily(familyId: string | null): void {
+    this.selectedFamilyId.set(familyId);
+    this.selectedRunId.set(null);
+  }
+
+  selectRun(runId: string | null): void {
+    this.selectedRunId.set(runId);
   }
 
   clearCreateError(): void {
@@ -88,11 +137,7 @@ export class RunsStore {
     return this.api.createRun(request).pipe(
       tap((run) => {
         this.isCreating.set(false);
-        this.patchedRunsById.update((current) => ({
-          ...current,
-          [run.id]: run,
-        }));
-        this.reloadRuns();
+        this.mergeRuns([run]);
       }),
       catchError((error) => {
         this.createError.set(this.createRunErrorMessage(error));
@@ -107,52 +152,32 @@ export class RunsStore {
       .connect()
       .pipe(takeUntilDestroyed(this.destroyRef))
       .subscribe({
-        next: (event) => {
-          this.hasReceivedLiveEvent.set(true);
-          this.lastEvent.set(event);
-          this.applyRunEvent(event);
-        },
+        next: (event) => this.applyRunEvent(event),
       });
   }
 
   private applyRunEvent(event: RunEvent): void {
-    switch (event.type) {
-      case 'RUN_CREATED':
-        this.reloadRuns();
-        break;
-
-      case 'RUN_UPDATED':
-        this.patchedRunsById.update((current) => ({
-          ...current,
-          [event.run.id]: event.run,
-        }));
-        break;
-
-      case 'RUN_COMPLETED':
-        this.patchRunStatus(event.runId, RunStatus.SUCCEEDED);
-        break;
-
-      case 'RUN_FAILED':
-        this.patchRunStatus(event.runId, RunStatus.FAILED);
-        break;
+    this.mergeRuns([event.run]);
+    if (event.type === 'RUN_CREATED') {
+      // New runs (including auto-improvement attempts) may not be in our snapshot yet.
+      this.reloadRuns();
     }
   }
 
-  private patchRunStatus(runId: string, status: RunStatus): void {
-    const existingRun = this.runs().find((run) => run.id === runId);
-
-    if (!existingRun) {
-      this.reloadRuns();
+  private mergeRuns(incoming: Run[]): void {
+    if (incoming.length === 0) {
       return;
     }
-
-    this.patchedRunsById.update((current) => ({
-      ...current,
-      [runId]: {
-        ...existingRun,
-        status,
-      },
-    }));
+    this.runsById.update((current) => {
+      const next = { ...current };
+      for (const run of incoming) {
+        const existing = next[run.id];
+        if (!existing || recencyKey(run) >= recencyKey(existing)) {
+          next[run.id] = run;
+        }
+      }
+      return next;
+    });
   }
 
   private createRunErrorMessage(error: unknown): string {
